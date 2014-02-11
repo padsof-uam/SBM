@@ -1,0 +1,22 @@
+9! = 0001:8 9 8 0  Esta mal. Deberia ser 58980. El problema esta en seguir multiplicando AX y sobreescribir DX.
+
+
+5! = 78Hex, 120Dec
+4! = 18Hex, 24Dec
+
+5!*4! = B40Hex, 2880Dec
+
+7! = 13b0Hex, 5040
+8! =  9d80, 40320
+
+8!*7! = 001C:C800
+
+
+EJERCICIO 2
+
+(2*3)! = 720
+(2*4)! = 8! =  9d80, 40320
+
+(3*3)! = 9! = B40Hex, 2880Dec
+
+(2*7)! = 14! = 2800Hex = 10240Dec

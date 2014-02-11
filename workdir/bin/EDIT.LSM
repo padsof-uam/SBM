@@ -1,0 +1,14 @@
+Begin3  
+  Title:          Edit
+  Version:        0.4 Beta  
+  Entered-date:   23/03/2000
+  Description:    FreeDos improved clone of MSDOS Edit
+  Keywords:       Edit Editor  
+  Author:         Shaun Raven 
+  Maintained-by:  Shaun Raven 
+  Primary-site:   http://crosswinds.net/~hypervox/edit04bx.zip
+  Alternate-site: 
+  Original-site:  http://freespace.virgin.net/shaun.raven/edit04bx.zip
+  Platforms:      DOS (Borland C)
+  Copying-policy: GPL
+End

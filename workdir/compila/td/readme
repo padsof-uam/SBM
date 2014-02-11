@@ -1,0 +1,433 @@
+                WELCOME TO TURBO DEBUGGER 2.01
+                ------------------------------
+
+  This README file contains important information about Turbo
+  Debugger Version 2.01. For the latest information about Turbo
+  Debugger 2.01, the accompanying programs, and the manual, read
+  this file in its entirety.
+
+
+TABLE OF CONTENTS
+-----------------
+1.  How to Get Help
+2.  Installation
+3.  Notes and Restrictions
+4.  About Turbo Debugger 2.01
+5.  Files on the Disks
+
+
+1.  HOW TO GET HELP
+-------------------
+
+  If you have any problems, please read this file, HELPME!.DOC,
+  MANUAL.DOC, and the Turbo Debugger User's Guide first. If you still
+  have questions and need assistance, help is available from the
+  following sources:
+
+  1. Type GO BOR on the CompuServe bulletin board system for
+     instant access to the Borland forums with their libraries of
+     technical information and answers to common questions.
+
+     If you are not a member of CompuServe, see the enclosed
+     special offer, and write for full details on how to receive
+     a free IntroPak containing a $15 credit toward your first
+     month's online charges.
+
+  2. Check with your local software dealer or users' group.
+
+  3. Write to us at the following address:
+
+     Borland International
+     Turbo Debugger Technical Support
+     1800 Green Hills Road
+     P.O. Box 660001
+     Scotts Valley, CA  95066-0001
+
+     Please remember to include your serial number or we will be
+     unable to process your letter.
+
+  4. If you have an urgent problem that cannot wait and you have
+     sent in the license agreement, you may call the Borland
+     Technical Support Department at (408) 438-5300 Monday through
+     Friday between the hours of 6 a.m. and 5 p.m. Pacific Time.
+     Please have the following information ready before calling:
+
+     a. Product name and serial number on your original
+        distribution disk. Please have your serial number ready
+        or we will be unable to process your call.
+
+     b. Product version number. The version number is displayed
+        when running Turbo Debugger and pressing the <Alt - space>
+        keys to bring up the System menu and choosing the
+        About... option.
+
+     c. Computer brand, model, and the brands and model numbers
+        of any additional hardware.
+
+     d. Operating system and version number. (The version number
+        can be determined by typing VER at the DOS prompt.)
+
+     e. Contents of your AUTOEXEC.BAT and CONFIG.SYS files.
+
+
+2.  INSTALLATION
+----------------
+
+  You should read the rest of this README file to get further
+  information about this release before you do the installation.
+
+  The Turbo Debugger/INSTALLATION disk contains a program called
+  INSTALL.EXE that will assist you with the installation of Turbo
+  Debugger 2.01.
+
+  To start the installation, change your current drive to the one
+  that has the install program on it and type INSTALL. You will be
+  given instructions in a box at the bottom of the screen for each
+  prompt. For example, if you are installing from drive A:,
+  you type
+
+    A: <Enter>
+    INSTALL <Enter>
+
+  If you have difficulty reading the text displayed by the INSTALL
+  program, use the /B command-line parameter to force it to use
+  black and white colors:
+
+    a:install /B      - Forces INSTALL into BW80 mode
+
+  Specifying the /B parameter may be necessary if you are using an
+  LCD screen or a system that has a color graphics adapter and a
+  monochrome or composite monitor.
+
+  Notes for installation:
+
+    INSTALL copies all Turbo Debugger files onto your hard disk
+    and puts them into subdirectories. The default subdirectories
+    are
+
+      Turbo Debugger Directory:                    C:\TD
+      Examples Subdirectory:                       C:\TD
+
+  By default, all files from the distribution disks are placed in
+  the Turbo Debugger Directory. If you would rather separate the
+  example programs into their own subdirectory, edit the default
+  example files path before selecting START INSTALLATION.
+
+  The Turbo Debugger distribution disks contain several files
+  with a .ZIP file extension: TD.ZIP, TDUTIL.ZIP, TDEXMPL.ZIP,
+  etc. These files contain one or more other files that have been
+  compressed and placed inside an archive. You can de-archive
+  them by using the UNZIP.EXE utility. For example,
+
+    unzip /o tdexmpl
+
+  unpacks all the files stored in the TDEXMPL.ZIP archive into the
+  current directory.
+
+  INSTALL gives you a choice of copying the .ZIP files intact or
+  de-archiving and copying all the individual files onto your hard
+  disk during the installation process.
+
+
+3.  NOTES AND RESTRICTIONS
+--------------------------
+o You need to set the files directive in your CONFIG.SYS file to
+  at least FILES = 10, preferably FILES = 20. If you have trouble
+  doing the File|DOS Shell command or if TD can't find your source
+  modules, make sure the FILES directive is in your CONFIG.SYS.
+
+o FNxxxx variants of floating-point instructions are not
+  supported in the built-in assembler in the CPU window.
+
+o The Fxxxx instructions do not generate an FWAIT in Turbo
+  Debugger. You must manually code an FWAIT before floating-point
+  instructions if needed.
+
+o A single Ctrl-Break inside a DOS function call waiting for
+  console input will not interrupt DOS and return control to Turbo
+  Debugger. You can either press Ctrl-Break once and then end the
+  console input function by pressing Enter, or press Ctrl-Break
+  twice. You will then interrupt DOS and Turbo Debugger will bring
+  up a CPU Viewer showing code inside DOS. At this point, you can
+  look around inside your program, but you might not be able to
+  use F7 or F8 to trace or step inside DOS. You should use only F9
+  at this point, possibly after setting a breakpoint inside your
+  program.
+
+o If you are using TD386, make sure that you use the -e option if
+  you have loaded any TSRs or device drivers that are using
+  extended memory allocated using the VDISK method. The value to
+  indicate after the -e is the total amount (in Kbytes) of
+  extended memory at the bottom of the extended memory area that
+  is being used by other applications before loading TD386. If you
+  do not use this option, TD386 may overwrite extended memory that
+  is being used by the other applications. For example, if a
+  disk-caching program that uses extended memory is loaded and you
+  do not use the -e option, the program may write incorrect
+  information to your hard disk.
+
+  NOTE: If your programs use the INT 0x15, function 0x88 method
+  to allocate memory, DO NOT count this memory, as TD386 will
+  automatically leave that memory alone.
+
+o TDINST contains two new options in the Display dialog box.
+  'Floating precision' allows you to set the floating-point
+  precision for variables entered in the Evaluate/Modify dialog
+  box and Watches window. 'Range inspect' lets you set the
+  default range for the number of elements to show in inspectors.
+
+o You can set the way display updating is performed using either
+  command line options (-do, -dp, -ds) or TDINST (selecting
+  Display from its main menu shows the Display Options dialog
+  box).  For both methods, user screen updating now defaults to
+  Swap.  You might want to select Flip for faster operation;
+  however, this option can cause display problems in some
+  circumstances (usually involving memory-resident programs'
+  assuming the active display page has not changed).  If you set
+  user screen updating to Flip and the File|Dos shell command
+  causes display problems, changing back to Swap should solve the
+  problem.
+
+o In version 2.01, TDINST contains two new options in the
+  Miscellaneous Options dialog box.
+
+    - Full Trace History enables you to set whether Turbo Debugger
+      begins with full Backtrace capability.  This option defaults
+      to OFF because saving Backtrace information slows execution
+      of the program.  If the Full Trace History option is off,
+      you can't use Run|Backtrace in Turbo Debugger until you turn
+      this option on, by choosing the Full History option on the
+      local menu of the Execution History window.
+
+    - Link Speed now has a setting for 19200 baud.  New command
+      line options controlling baud rate in TD and TDREMOTE are:
+        -rs1      9600 baud (unchanged from version 2.0)
+        -rs2     19200 baud (new)
+        -rs3     38400 baud (previously -rs2)
+        -rs4    115000 baud (default, previously -rs3)
+
+o In version 2.01, the default setting for the NMI intercept is
+  OFF. If you are using a hardware debugging board, you might need
+  to turn this option on. Use caution, however, as several types
+  of machines have incompatibilities that might cause mysterious
+  crashes, possibly causing loss of data in memory or on disk. If
+  you are using a Tandy 1000, we strongly recommended that you
+  leave the NMI intercept off.
+
+o For those of you using TD286.EXE, note that you may have to run
+  TD286INS.EXE so that TD286 recognizes your machine
+  configuration. In doing so, a file may be generated which has a
+  .db extension. It is necessary that we have this file in order
+  to make TD286 a better product.  You may, if you wish, upload
+  this file to our BBS (Bulletin Board Service) here at Borland.
+  When doing so you should call (408) 438-5300 and give our
+  representatives your serial number so that they may allow you to
+  upload your file.  They will help you with any questions you
+  have regarding the use of our BBS. You can use TD286 with
+  programs that are VCPI compliant, such as 386MAX, CEMM, & QEMM.
+  However, to do so, there MUST be at least 640K of available EMS
+  provided by these programs.  You can determine how much free EMS
+  is available by using TDMEM.
+
+o If you are using TD386, and you are receiving a "not enough
+  memory to load symbol table" message, you need to enable EMS
+  emulation for TD386.  To do this, use the -F option. For
+  instance, to set up EMS for TD386 at segment 0D000h, invoke
+  TD386 with "-FD000".
+
+o If you are using an HP-Vectra, and you get an Unexpected Interrupt
+  06 when trying to run TD386, you need to set an option in the
+  CMOS setup.  By default the Vectra series uses a protected mode
+  instruction as part of the HP-HIL.  To work around this, contact
+  Hewlett Packard for instruction on disabling this function.
+
+o If an Exception 06 occurs after running for awhile in TD386,
+  your code has probably been overwritten.  An Exception 6 is
+  generated by the 80386 when an illegal opcode is encountered.
+  Common causes of this problem are using uninitialized pointers,
+  etc.
+
+o Exception 06, Exception 13, and Unexpected Interrupt 0D can also
+  occur if you are using an old mouse driver, network driver, or
+  other device driver. If you get these errors in TD386, try
+  removing device drivers one at a time, starting with your mouse
+  driver, then your network driver, and so on until you identify
+  the offending driver. If an upgrade is available for the driver,
+  see if installing it corrects the problem. The last resort is to
+  remove the driver entirely, if possible.
+
+o If stepping through your program seems extremely slow there are
+  two common causes.
+
+     - If you are using a PS/2 mouse driver, either remove the
+       mouse driver or use a non-PS/2 mouse driver. Alternatively,
+       you can disable the use of the mouse through the -p-
+       command line option for TD.
+
+     - Otherwise, slow execution is usually due to excessive disk
+       swapping. Try using the "-y##" command line option (changes
+       the size of your overlay pool) and experiment with higher
+       or lower ## values.
+
+o If you have a problem with TDCONVRT, you can get the latest
+  version either from CompuServe, forum BPROGB section 7, or by
+  calling the Borland Support BBS at (408)439-9181 and downloading
+  TDCONVRT.ZIP. You will need the serial number from your Turbo
+  Debugger installation diskette.
+
+o If you get a "Cannot run TD386: Processor is already in V8086
+  mode" error message when trying to load TD386, then you are
+  using a program which uses the virtual mode of the 80386 (such
+  as QEMM).  At this time, it is not possible to use these
+  programs and TD386 at the same time.  If you need to use these
+  memory managers, try using TD286 instead of TD386.
+
+o If you're having problems with the mouse cursor disappearing or
+  behaving erratically, you probably need an updated version of your
+  mouse driver.  Because Turbo Debugger 2.01 demands more from the
+  mouse driver than most previous programs, you might not experience
+  a problem with your current driver until you use Turbo Debugger 2.01.
+
+  At this time, the current major mouse driver revisions are:
+
+        Logitech        4.10
+        Genius          9.03
+        Microsoft       7.04
+
+  Contact the manufacturer of your mouse for information about
+  obtaining a newer version.
+
+
+4.  ABOUT TURBO DEBUGGER 2.01
+-----------------------------
+o Version 2.01 of Turbo Debugger has been designed to support the
+  C++ language of Turbo C++. Earlier versions of Turbo C, Turbo
+  Pascal, and TASM are still compatible with the new Turbo
+  Debugger 2.01 as follows:
+
+     TASM 1.0         (or later)
+     Turbo C 2.0
+     Turbo Pascal 5.0 (or later)
+
+o The Utilities and Hardware Debugging appendices from the Turbo
+  Debugger User's Guide have been incorporated into the
+  MANUAL.DOC file on the Turbo Debugger disks.
+
+o The file HELPME!.DOC on the distribution disks has more
+  information about using the new mouse capabilities of Turbo
+  Debugger 2.01.
+
+o By default, TD286 will use all of your extended memory.  If you
+  are debugging programs which use extended memory you can
+  specify the amount of extended memory that TD286 is allowed to
+  use by creating a file in the root directory of your current
+  drive, called CONFIG.286.  This file can contain the following
+  command:
+
+     MEGS=#
+       {Where # = the amount of extended memory TD286 is allowed to use}
+
+  Also note p. 254 of the Turbo Debugger User Manual states that TD286.EXE
+  uses all the same command-line options as TD.EXE.  This holds with some
+  exceptions.  The -sm# option is not used by TD286.EXE since it runs in
+  protected mode and automatically defines the necessary space for your
+  programs spare symbol table.  The -r<X> options are not used since it
+  is not necessary to perform remote debugging and the -y<#> options since
+  TD286 does not use overlays.
+
+5.  FILES ON THE DISKS
+----------------------
+
+  TURBO DEBUGGER/INSTALLATION
+  ---------------------------
+  INSTALL  EXE  -  Turbo Debugger installation program
+  README   COM  -  Program to display README file
+  UNZIP    EXE  -  Program to unpack archive programs
+  TD       ZIP  -  Packed file containing the Turbo Debugger program
+    TD       EXE  -  Turbo Debugger Program
+    HELPME!  DOC  -  Lists answers to common questions about TD
+    MANUAL   DOC  -  Explains corrections to the user's guide
+  README        -  This file
+
+
+  TURBO DEBUGGER/UTILITIES
+  ------------------------
+  TDUTIL   ZIP  -  Packed help and utility programs
+    TD386    EXE  -  80386 virtual debugging
+    TDCONVRT EXE  -  Converts CodeView information to Turbo Debugger format
+    TDH386   SYS  -  Device driver for TD386.EXE and the 80386 debug registers
+    TDMAP    EXE  -  Extracts debug information from .MAP files
+    TDNMI    COM  -  TSR to clear NMI every half second
+    TDPACK   EXE  -  Compresses debug information
+    TDREMOTE EXE  -  Remote debugging kernel
+    TDRF     EXE  -  Remote file transfer utility
+    TDSTRIP  EXE  -  Strips debug information off executable files
+    TDUMP    EXE  -  Dumps executable and object file information
+    TDINST   EXE  -  Custom configuration program
+    TDHELP   TDH  -  Turbo Debugger help file
+    TDMEM    EXE  -  Displays the contents of memory
+    TDDEV    EXE  -  Displays any device drivers that are loaded
+
+  TDEXMPL  ZIP  -  Packed file that contains Turbo Debugger examples
+    TCDEMO   C    -  Turbo C Program To Demonstrate Debugger Features
+    TCDEMO   EXE  -  Executable File For Turbo C Program
+    TCDEMOB  C    -  Turbo C Program To Demonstrate Debugger Features
+    TCDEMOB  EXE  -  Executable File For Turbo C Program
+    TPDEMO   PAS  -  Turbo Pascal Program To Demonstrate Debugger Features
+    TPDEMO   EXE  -  Executable File For Turbo Pascal Program
+    TPDEMOB  PAS  -  Turbo Pascal Program To Demonstrate Debugger Features
+    TPDEMOB  EXE  -  Executable File For Turbo Pascal Program
+
+  TFUTIL2  ZIP  -  Packed Turbo Profiler utility
+    TF386    EXE  -  Utility For 80386 virtual profiling
+
+
+  TURBO DEBUGGER/TD286
+  --------------------
+  TD286    ZIP  -  Archive containing the Protected Mode Turbo Debugger
+    TD286    EXE  -  Protected Mode Turbo Debugger program
+    TD286INS EXE  -  Kernel Configuration Program for Installing TD286.EXE
+
+  TFEXMPL1  ZIP  -  Archive containing Turbo Profiler examples
+    PLOST    C
+    PLOST    EXE
+    PLOSTPAS PAS
+    PLOSTPAS EXE
+    PTOLL    C
+    PTOLL    EXE
+    PTOLLPAS PAS
+    PTOLLPAS EXE
+    CALLTEST C
+    CALLTEST EXE
+    OVRDEMO  PAS
+    OVRDEMO1 PAS
+    OVRDEMO2 PAS
+    OVRDEMO  EXE
+    OVRDEMO  OVR
+
+  TFEXMPL3 ZIP  -  Archive containing Turbo Profiler examples
+    PRIME0PA PAS
+    PRIME0PA EXE
+    PRIME1PA PAS
+    PRIME1PA EXE
+    PRIME2PA PAS
+    PRIME2PA EXE
+    PRIME3PA PAS
+    PRIME3PA EXE
+    PRIME4PA PAS
+    PRIME4PA EXE
+    PRIME5PA PAS
+    PRIME5PA EXE
+    PRIME6PA PAS
+    PRIME6PA EXE
+
+
+  NOTE: If you have the 3.5" version of Turbo Debugger, the disk
+      layout is as follows.
+           The TURBO DEBUGGER/INSTALLATION disk is combined with
+           the TURBO DEBUGGER/UTILITIES disk.
+
+           The TURBO PROFILER/INSTALLATION disk is combined with
+           the TURBO DEBUGGER/TD286 disk.
+
+
