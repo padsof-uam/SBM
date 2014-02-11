@@ -8,8 +8,10 @@
 
 DATOS SEGMENT 
 
-;-- rellenar con los datos solicitados 
-
+CONTADOR DB ?
+BEBA DW 0CAFEH
+TABLA100 DB 100 DUP (0)
+ERROR1 DB " Errores en el programa. Resultados incorrectos. "
 DATOS ENDS 
 
 ;************************************************************************** 
@@ -39,3 +41,9 @@ EXTRA ENDS
 CODE SEGMENT 
 
 ASSUME CS: CODE, DS: DATOS, ES: EXTRA, SS: PILA 
+START PROC 
+	MOV DX, OFFSET ERROR1
+	MOV CX, OFFSET TABLA100
+	MOV BX, DS:DX
+CODE ENDS 
+END START 
