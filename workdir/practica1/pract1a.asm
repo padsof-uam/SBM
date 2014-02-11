@@ -49,13 +49,13 @@ START PROC
     MOV DX,CX
     ;Cargar en AL el contenido de la posición de memoria 65646H y en
     ;AH en contenido de la posición 65647H 
-    MOV AL,DS:646H
-    MOV AH,DS:647H
+    MOV AL,DS:0646H
+    MOV AH,DS:0647H
 
-    MOV CH,DS:5007
+    MOV DS:5007h,CH
     MOV AX,[DI]
 
-    MOV AX,[BP]+10
+    MOV AX,[BP]-10
 
 ; FIN DEL SEGMENTO DE CODIGO 
 CODE ENDS 
