@@ -1,0 +1,5 @@
+*.asm
+*.map
+*.obj
+*.pdf
+*.exe
