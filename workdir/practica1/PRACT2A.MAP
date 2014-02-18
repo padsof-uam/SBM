@@ -3,8 +3,8 @@
 
  00000H 00097H 00098H DATOS              
  000A0H 000A3H 00004H EXTRA              
- 000B0H 000B8H 00009H CODE               
- 000C0H 000FFH 00040H PILA               STACK
+ 000B0H 000C8H 00019H CODE               
+ 000D0H 0010FH 00040H PILA               STACK
 
 Program entry point at 000B:0000
 
