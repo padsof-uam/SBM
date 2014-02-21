@@ -1,4 +1,7 @@
 *.map
+*.MAP
 *.obj
+*.OBJ
 *.pdf
 *.exe
+*.EXE
