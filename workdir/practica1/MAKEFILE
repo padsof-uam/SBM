@@ -1,13 +1,30 @@
-all: pract2a.exe pract3a.exe
+all: a b c
 
-pract2a.exe: pract2a.obj
-    tlink /v pract2a
+a: pract1a.exe 
 
-pract2a.obj: pract2a.asm
-    tasm /zi pract2a
+pract1a.exe: pract1a.obj
+    tlink /v pract1a
 
-pract3a.exe: pract3a.obj
-    tlink /v pract3a
+pract1a.obj: pract1a.asm
+    tasm /zi pract1a
 
-pract3a.obj: pract3a.asm
-    tasm /zi pract3a
+
+b: pract1b.exe 
+
+pract1b.exe: pract1b.obj
+    tlink /v pract1b
+
+pract1b.obj: pract1b.asm
+    tasm /zi pract1b
+
+c: pract1c.exe
+pract1c.exe: pract1c.obj
+    tlink /v pract1c
+
+pract1c.obj: pract1c.asm
+    tasm /zi pract1c
+
+clean: 
+	del *.EXE 
+	del *.MAP 
+	del *.OBJ
