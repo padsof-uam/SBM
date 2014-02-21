@@ -10,7 +10,7 @@ DATOS SEGMENT
 CONTADOR DB 0
 BEBA DW 0CAFEH
 TABLA100 DB 100 DUP (0)
-ERROR1 DB " Errores en el programa. Resultados incorrectos. "
+ERROR1 DB "Errores en el programa. Resultados incorrectos."
 DATOS ENDS 
 
 ;************************************************************************** 
@@ -40,17 +40,38 @@ EXTRA ENDS
 CODE SEGMENT 
 	ASSUME CS: CODE, DS: DATOS, ES: EXTRA, SS: PILA 
 START PROC 
-	MOV AX,DATOS
-	MOV DS,AX
+	; INICIALIZA LOS REGISTROS DE SEGMENTO CON SU VALOR
+
+	MOV AX, DATOS
+	MOV DS, AX
+	MOV AX, PILA
+	MOV SS, AX
+	MOV AX, EXTRA
+	MOV ES, AX
+	MOV SP, 64 ; CARGA EL PUNTERO DE PILA CON EL VALOR MAS ALTO
+
+	; FIN DE LAS INICIALIZACIONES
+
+	; COMIENZO DEL PROGRAMA
+
+	; La instrucción MOV TABLA100[63H],ERROR1[6] no está permitida,
+	;	por lo que utilizamos un registro auxiliar.
 	MOV BL,ERROR1[6]
 	MOV TABLA100[63H],BL
 
+	; Aquí también necesitamos utilizar un registro auxiliar
 	MOV BX, BEBA
 	MOV WORD PTR TABLA100[23H],BX
 
-	MOV CONTADOR, BL
-	;MOV CX, OFFSET TABLA100+63H
-	;MOV BX, DS:DX
+	
+	; Debido a la arquitectura Little Endian, el byte más significativo
+	;	se encuentra en BL y no en BH.
+		MOV CONTADOR, BL
+	
+	; Devolvemos el control al sistema operativo para liberar toda la
+	;	memoria.
+	MOV AX, 4C00H
+	INT 21H
 CODE ENDS 
 
 END START 

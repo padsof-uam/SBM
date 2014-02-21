@@ -8,7 +8,6 @@
 
 DATOS SEGMENT 
 
-;-- rellenar con los datos solicitados 
 
 DATOS ENDS 
 
