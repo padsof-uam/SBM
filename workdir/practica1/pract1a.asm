@@ -1,3 +1,6 @@
+;; Autores: Guillermo Julian Moreno y Victor de Juan Sanz
+
+
 ;************************************************************************** 
 
 ; DEFINICION DEL SEGMENTO DE DATOS 
@@ -13,7 +16,7 @@ DATOS ENDS
 
 PILA SEGMENT STACK "STACK" 
 
-DB 40H DUP (0) ;ejemplo de inicialización, 64 bytes inicializados a 0 
+    DB 40H DUP (0) ;ejemplo de inicializacion, 64 bytes inicializados a 0 
 
 PILA ENDS 
 
@@ -30,7 +33,7 @@ EXTRA ENDS
 ; DEFINICION DEL SEGMENTO DE CODIGO 
 
 CODE SEGMENT 
-;	ASSUME CS: CODE, DS: DATOS, ES: EXTRA, SS: PILA 
+	ASSUME CS: CODE, DS: DATOS, ES: EXTRA, SS: PILA 
  
 START PROC 
 
@@ -53,12 +56,16 @@ START PROC
     MOV CX,3412H
     MOV DX,CX
 
-    ; Cargar en AL el contenido de la posición de memoria 65646H y en
-    ;   AH en contenido de la posición 65647H 
+    ; Cargar en AL el contenido de la posicion de memoria 65646H y en
+    ;   AH en contenido de la posicion 65647H 
     MOV AL,DS:0646H
     MOV AH,DS:0647H
 
-    MOV DS:5007h,CH
+
+    ; Como DS empieza en 6500h, la posicion de memoria en la que guardar
+    ;   CH sera DS:(70007H-6500H), es decir, B007H. Podriamos haber cambiado
+    ;   el registro DS pero nos parece que no es una buena practica de programacion.
+    MOV DS:0B007h,CH
     MOV AX,[DI]
 
     MOV AX,[BP]-10
