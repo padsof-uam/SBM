@@ -1,0 +1,23 @@
+all: a b 
+
+a: pract2a.exe 
+
+pract2a.exe: pract2a.obj
+    tlink /v pract2a
+
+pract2a.obj: pract2a.asm
+    tasm /zi pract2a
+
+
+b: pract2b.exe 
+
+pract2b.exe: pract2b.obj
+    tlink /v pract2b
+
+pract2b.obj: pract2b.asm
+    tasm /zi pract2b
+
+clean: 
+	del *.EXE 
+	del *.MAP 
+	del *.OBJ
