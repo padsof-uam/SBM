@@ -8,7 +8,11 @@
 
 DATOS SEGMENT 
 
-MATRIZ DB 3,2,3,2,3,1,0,0,1
+MATRIZ DB 3,-2,3,0,1,-2,0,2,9
+
+DEC_RESULT DB 8 DUP(0)
+
+BUFFEREND DB "$"
 
 DATOS ENDS 
 
@@ -27,8 +31,6 @@ PILA ENDS
 ; DEFINICION DEL SEGMENTO EXTRA 
 
 EXTRA SEGMENT 
-
-RESULT DW 0,0 ;ejemplo de inicialización. 2 PALABRAS (4 BYTES) 
 
 EXTRA ENDS 
 
@@ -52,7 +54,10 @@ START PROC
 
 	MOV DI, 0H
 	MOV CX,4H
-MAIN_LOOP_1:
+
+
+MAIN_LOOP_1:;; Bucle principal.
+	;; Iteramos 3 veces (con SI como contador) para calcular el producto de las 3 diagonales "principales".
 	PUSH BX
 	PUSH SI
 	CALL DT_DIAG
@@ -66,6 +71,7 @@ MAIN_LOOP_1:
 	MOV SI,0H
 	MOV CX,7H
 MAIN_LOOP_2:
+	;; Iteramos 3 veces con las diagonales "secundarias".
 	PUSH BX
 	PUSH SI
 	CALL DT_DIAG
@@ -77,7 +83,36 @@ MAIN_LOOP_2:
 	CMP SI,3H
 	JNE MAIN_LOOP_2
 
-	MOV DX,DX
+	;; Tenemos el resultado en BX.
+
+	MOV SI,OFFSET BUFFEREND
+	MOV AX,BX
+	MOV DI,0
+CONVERT:
+	MOV CX,0AH
+    XOR DX,DX
+	DIV CX
+	ADD DL,'0'
+	CMP DL,'9'
+	JBE STORE
+	ADD DL, 'A'-'0'-0AH
+
+STORE:
+	DEC SI
+	MOV [SI],DL
+	INC DI
+	AND AX, AX
+	JNZ CONVERT
+
+	MOV AH,9H
+	MOV DX,OFFSET BUFFEREND
+	SUB DX,DI
+	INT 21H
+
+
+	MOV AX, 4C00H 
+    INT 21H 
+
 START ENDP 
 
 DT_DIAG PROC NEAR
@@ -107,9 +142,6 @@ DT_DIAG_LOOP:
 
 	RET
 DT_DIAG ENDP
-
-MD PROC NEAR
-	
 
 CODE ENDS
 END START
