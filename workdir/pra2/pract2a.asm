@@ -8,7 +8,11 @@
 
 DATOS SEGMENT 
 
-MATRIZ DB 35,-2,3,0,1,-2,0,2,1
+MATRIZ DB 3,2,3,0,6,2,0,2,1,"$"
+
+TEXTO_INI DB "La matriz es:",0AH,"$"
+TEXTO_FIN DB "El determinante es:",0AH,"$"
+
 
 DEC_RESULT DB 8 DUP(0)
 
@@ -52,6 +56,15 @@ START PROC
 	MOV ES, AX
 	MOV SP, 64 ; CARGA EL PUNTERO DE PILA CON EL VALOR MAS ALTO
 
+	MOV AH,9H
+	MOV DX,OFFSET TEXTO_INI
+	INT 21H
+
+	MOV DX, OFFSET MATRIZ
+	INT 21H
+
+
+	;; Empieza el cálculo de la matriz.
 	MOV DI, 0H
 	MOV CX,4H
 
@@ -87,24 +100,12 @@ MAIN_LOOP_2:
 
 	MOV SI,OFFSET BUFFEREND
 	MOV AX,BX
-	MOV DI,0
-CONVERT:
-	MOV CX,0AH
-    XOR DX,DX
-	DIV CX
-	ADD DL,'0'
-	CMP DL,'9'
-	JBE STORE
-	;;ADD DL, 'A'-'0'-0AH
 
-STORE:
-	DEC SI
-	MOV [SI],DL
-	INC DI
-	AND AX, AX
-	JNZ CONVERT
+	CALL PRINT
 
 	MOV AH,9H
+	MOV DX, OFFSET TEXTO_FIN
+	INT 21H
 	MOV DX,OFFSET BUFFEREND
 	SUB DX,DI
 	INT 21H
@@ -114,6 +115,32 @@ STORE:
     INT 21H 
 
 START ENDP 
+
+PRINT PROC NEAR
+;; Parámetros: 
+;	IN: 	AX:		El resultado hexadecimal a imprimir en decimal.
+;			SI: 	El offset de la última posición en la que se empieza a escribir.
+;
+;	OUT:	Almacena en [SI] los bytes ASCII de los caracteres del número.
+;			DI:		El número de bytes escritos
+;	
+;	No utiliza: DI,BX.
+	
+	MOV DI,0
+CONVERT:
+	MOV CX,0AH
+    XOR DX,DX
+	DIV CX
+	ADD DL,'0'
+
+	DEC SI
+	MOV [SI],DL
+	INC DI
+	AND AX, AX
+	JNZ CONVERT
+	RET
+PRINT ENDP
+
 
 DT_DIAG PROC NEAR
 	MOV AX, 1H
