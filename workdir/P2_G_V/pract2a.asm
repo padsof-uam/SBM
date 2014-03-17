@@ -14,7 +14,6 @@ DATOS SEGMENT
 	DET_RESULT DB 6 DUP (0),"$"
 	TEXTO_FIN DB 0AH,"El determinante es:",0AH,"$"
 	AUX DW ?
-
 DATOS ENDS 
 
 ;************************************************************************** 
@@ -22,9 +21,7 @@ DATOS ENDS
 ; DEFINICION DEL SEGMENTO DE PILA 
 
 PILA SEGMENT STACK "STACK" 
-
-DB 40H DUP (0) ;ejemplo de inicialización, 64 bytes inicializados a 0 
-
+	DB 40H DUP (0) ;ejemplo de inicialización, 64 bytes inicializados a 0 
 PILA ENDS 
 
 ;************************************************************************** 
@@ -178,6 +175,7 @@ PRINT_BYTES PROC NEAR
 ;			DI: 	El número de caracteres a imprimir.
 ;
 ;	OUT:	Almacena en [SI] los bytes ASCII de los caracteres del número.
+;			CH guarda el número de caracteres escrito.
 ;	
 ;	USES: AX,BX,CL,CH,DL,DI,SI 
 	MOV DL,1H
@@ -186,7 +184,7 @@ PRINT_BYTES PROC NEAR
 MAIN_BYTE:
 	MOV AL,[BX+DI-1]
 	MOV AH,AL
-	AND AH,80H
+	AND AH,80H ; Comparamos si es negativo.
 	JZ  NEG_CORRECTED_BYTE
 	NEG AL
 	MOV DL,0H
@@ -194,7 +192,7 @@ NEG_CORRECTED_BYTE:
 CONVERT_BYTE:
     XOR AH,AH
 	DIV CL
-	ADD AH,'0'
+	ADD AH,'0' ; Le sumamos la diferencia para convertirlo en ASCII
 	DEC SI
 	MOV [SI],AH
 	INC CH
