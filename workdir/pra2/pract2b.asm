@@ -6,7 +6,7 @@
 
 ; DEFINICION DEL SEGMENTO DE DATOS 
 
-DIR equ 50H
+DIR equ 50H * 4
 
 DATOS SEGMENT 
 	MATRIZ DB -3,-2,-3,0,-6,-2,10,12,-1,"$"
@@ -59,7 +59,7 @@ START PROC
 	CLI
 	MOV BX, OFFSET PRINT_WORDS 
 	MOV ES:[DIR], BX
-	MOV BX, SEG PRINT_WORDS 
+	MOV BX, CODE
 	MOV ES:[DIR + 2], BX
 	STI
 
@@ -71,7 +71,7 @@ START PROC
 MATRIZ_PR_LOOP:	
 	MOV BL, MATRIZ[DI]
 	CALL SEXT
-	CALL PRINT_WORDS
+	INT 50H
 	MOV DX, AX
 	MOV AH,9H
 	INT 21H ; Imprimimos la cadena que nos haya devuelto la interrupción
@@ -138,7 +138,7 @@ MAIN_LOOP_2:
 
 
 	;; Convertimos el valor de BX a ASCII e imprimimos.
-	CALL PRINT_WORDS
+	INT 50H
 	MOV DX, AX
 	MOV AH, 9H
 	INT 21H
