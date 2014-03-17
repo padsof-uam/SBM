@@ -7,9 +7,9 @@
 ; DEFINICION DEL SEGMENTO DE DATOS 
 
 DATOS SEGMENT 
-	MATRIZ DB -13,2,3,0,16,22,0,2,1,"$"
+	MATRIZ DB 243,2,3,0,16,220,0,21,1,"$"
 	TEXTO_INI DB "La matriz 3x3 es:",0AH,"$"
-	DEC_RESULT DB 25 DUP(0)
+	DEC_RESULT DB 50 DUP(0)
 	BUFFEREND DB "$"
 	DET_RESULT DW 0,0,"$"
 	TEXTO_FIN DB 0AH,"El determinante es:",0AH,"$"
@@ -140,7 +140,7 @@ PRINT PROC NEAR
 ;
 ;	OUT:	Almacena en [SI] los bytes ASCII de los caracteres del número.
 ;	
-
+	XOR CH,CH
 	MOV CL,0AH
 MAIN:
 	MOV AL,[BX+DI-1]
@@ -151,6 +151,7 @@ CONVERT:
 
 	DEC SI
 	MOV [SI],AH
+	INC CH
 	AND AL, AL
 	JNZ CONVERT
 	DEC DI
