@@ -13,7 +13,7 @@ DATOS SEGMENT
 	BUFFEREND DB "$"
 	DET_RESULT DB 6 DUP (0),"$"
 	TEXTO_FIN DB 0AH,"El determinante es:",0AH,"$"
-	AUX DW
+	AUX DW ?
 
 DATOS ENDS 
 
