@@ -7,16 +7,12 @@
 ; DEFINICION DEL SEGMENTO DE DATOS 
 
 DATOS SEGMENT 
-
-MATRIZ DB 3,2,3,0,6,2,0,2,1,"$"
-
-TEXTO_INI DB "La matriz es:",0AH,"$"
-TEXTO_FIN DB "El determinante es:",0AH,"$"
-
-
-DEC_RESULT DB 8 DUP(0)
-
-BUFFEREND DB "$"
+	MATRIZ DB 3,2,3,0,6,2,0,2,1,"$"
+	TEXTO_INI DB "La matriz es:",0AH,"$"
+	DEC_RESULT DB 25 DUP(0)
+	BUFFEREND DB "$"
+	DET_RESULT DW 0,0,"$"
+	TEXTO_FIN DB 0AH,"El determinante es:",0AH,"$"
 
 DATOS ENDS 
 
@@ -60,12 +56,19 @@ START PROC
 	MOV DX,OFFSET TEXTO_INI
 	INT 21H
 
-	MOV DX, OFFSET MATRIZ
-	INT 21H
+	MOV DI, 9H
+	MOV SI, OFFSET BUFFEREND
+	MOV BX, OFFSET MATRIZ
+	CALL PRINT
 
+	MOV AH,9H
+	MOV DX,OFFSET DEC_RESULT
+	INT 21H
 
 	;; Empieza el cálculo de la matriz.
 	MOV DI, 0H
+	MOV SI, 0H
+
 	MOV CX,4H
 
 
@@ -98,16 +101,23 @@ MAIN_LOOP_2:
 
 	;; Tenemos el resultado en BX.
 
-	MOV SI,OFFSET BUFFEREND
-	MOV AX,BX
 
+	;; Argumentos de entrada de print.
+	MOV SI,OFFSET DET_RESULT
+	MOV [SI],BX
+	MOV BX, OFFSET DET_RESULT
+	MOV SI, OFFSET TEXTO_FIN-2
+	MOV DI, 1H
 	CALL PRINT
+
+
+
 
 	MOV AH,9H
 	MOV DX, OFFSET TEXTO_FIN
 	INT 21H
-	MOV DX,OFFSET BUFFEREND
-	SUB DX,DI
+	MOV DX,OFFSET TEXTO_FIN
+	SUB DX,3H
 	INT 21H
 
 
@@ -118,26 +128,27 @@ START ENDP
 
 PRINT PROC NEAR
 ;; Parámetros: 
-;	IN: 	AX:		El resultado hexadecimal a imprimir en decimal.
+;	IN: 	BX:		El offset de donde está el valor.
 ;			SI: 	El offset de la última posición en la que se empieza a escribir.
+;			DI: 	El número de caracteres a imprimir.
 ;
 ;	OUT:	Almacena en [SI] los bytes ASCII de los caracteres del número.
-;			DI:		El número de bytes escritos
 ;	
-;	No utiliza: DI,BX.
-	
-	MOV DI,0
+
+	MOV CL,0AH
+MAIN:
+	MOV AL,[BX+DI-1]
 CONVERT:
-	MOV CX,0AH
-    XOR DX,DX
-	DIV CX
-	ADD DL,'0'
+    XOR AH,AH
+	DIV CL
+	ADD AH,'0'
 
 	DEC SI
-	MOV [SI],DL
-	INC DI
-	AND AX, AX
+	MOV [SI],AH
+	AND AL, AL
 	JNZ CONVERT
+	DEC DI
+	JNZ MAIN
 	RET
 PRINT ENDP
 
