@@ -7,8 +7,8 @@
 ; DEFINICION DEL SEGMENTO DE DATOS 
 
 DATOS SEGMENT 
-	MATRIZ DB 3,2,3,0,6,2,0,2,1,"$"
-	TEXTO_INI DB "La matriz es:",0AH,"$"
+	MATRIZ DB -13,2,3,0,16,22,0,2,1,"$"
+	TEXTO_INI DB "La matriz 3x3 es:",0AH,"$"
 	DEC_RESULT DB 25 DUP(0)
 	BUFFEREND DB "$"
 	DET_RESULT DW 0,0,"$"
@@ -65,7 +65,7 @@ START PROC
 	MOV DX,OFFSET DEC_RESULT
 	INT 21H
 
-	;; Empieza el cálculo de la matriz.
+	;; EMPIEZA EL CÁLCULO DE LA MATRIZ.
 	MOV DI, 0H
 	MOV SI, 0H
 
@@ -126,6 +126,12 @@ MAIN_LOOP_2:
 
 START ENDP 
 
+
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;PRINT PROCEDURE;;;;;;;;;;;;;;;;;;;;;;
 PRINT PROC NEAR
 ;; Parámetros: 
 ;	IN: 	BX:		El offset de donde está el valor.
@@ -148,11 +154,24 @@ CONVERT:
 	AND AL, AL
 	JNZ CONVERT
 	DEC DI
+	JZ LAST
+	DEC SI
+	MOV [SI],BYTE PTR ','
+LAST:
+	CMP DI,0H
 	JNZ MAIN
 	RET
 PRINT ENDP
 
 
+
+
+
+
+
+
+
+;;;;;;;;;;;;;; CALCULO PRODUCTO DIAGONAL ;;;;;;;;;;;;;;;;;;;;;;;;;;
 DT_DIAG PROC NEAR
 	MOV AX, 1H
 	MOV SI, 0H
