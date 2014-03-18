@@ -8,3 +8,5 @@
 *.exe
 *.EXE
 *sublime*
+*.LST
+*.lst
