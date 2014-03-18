@@ -1,7 +1,6 @@
 ;************************************************************************** 
 ;Víctor de Juan Sanz y Guillermo Julián Moreno
 ;************************************************************************** 
-
 ; DEFINICION DEL SEGMENTO DE DATOS 
 DATOS SEGMENT 
 ;-- rellenar con los datos solicitados 
@@ -33,6 +32,89 @@ START PROC
 
 START ENDP 
 
+
+
+PUBLIC _minimoComunMultiplo
+;;;	Recibe 2 unsigned int por la pila.
+_minimoComunMultiplo PROC FAR
+
+	;; Acceso a los parámetros/argumentos.
+	PUSH BP
+	MOV BP,SP
+	MOV AX,[BP+6]
+	MOV BX,[BP+8]
+
+	; Empezamos
+
+EUCLIDES:
+	CMP BX,0H
+	JZ EUCLIDES_FIN
+	MOV DX,0H
+	DIV BX
+	MOV AX,BX
+	MOV BX,DX
+	JMP EUCLIDES
+
+EUCLIDES_FIN:
+	;; Tenemos en AX el máximo común divisor.
+
+	MOV CX,AX
+	MOV DX,0H
+	;; RECUPERAMOS LOS ARGUMENTOS.
+	MOV AX,[BP+6]
+	MOV BX,[BP+8]
+
+	MUL BX
+	DIV CX
+
+	;; TENEMOS EL RESULTADO EN DX:AX. COMO LA FUNCIÓN ES UNSIGNED INT, SOLO 
+	;	TENDREMOS EN CUENTA AX
+
+	POP BP
+	RET
+
+_minimoComunMultiplo ENDP
+
+
+PUBLIC _calculaMediana
+
+_calculaMediana PROC FAR
+	PUSH BP
+	MOV BP,SP
+
+	MOV AX,[BP+6]
+	MOV BX,[BP+8]
+	MOV CX,[BP+10]
+	MOV DX,[BP+12]
+
+	MOV DI,8H ;; ITERADOR DE "ARRIBA"
+	MOV SI,6H ;; ITERADOR DE "ABAJO"
+
+INSERT_SORT:
+	MOV SI,DI
+
+	MOV AX,[BP+DI]
+
+INSERT_SORT_L2:
+	SUB SI,2
+	MOV BX,[BP+SI]
+	CMP AX,BX
+	JNS INSERT_PASS_END	
+	MOV [BP+SI],AX
+	MOV [BP+SI+2],BX
+	JMP INSERT_SORT_L2
+
+INSERT_PASS_END:
+	ADD DI,2H
+	CMP DI,14
+	JNZ INSERT_SORT
+
+	MOV AX, [BP+8]
+
+	POP BP
+	RET
+
+_calculaMediana ENDP
 
 CODE ENDS
 END START
