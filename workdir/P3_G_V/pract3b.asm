@@ -33,5 +33,63 @@ START PROC
 
 START ENDP 
 
+
+PUBLIC _enteroACadenaHexa
+_enteroACadenaHexaPROC FAR
+	
+	PUSH BP
+	MOV BP,SP
+
+	POP BP
+	RET
+
+ENDP _enteroACadenaHexa
+
+PUBLIC _calculaChecksum
+_calculaChecksumPROC FAR
+	
+	PUSH BP
+	MOV BP,SP
+
+	POP BP
+	RET
+
+ENDP _calculaChecksum
+
+PUBLIC _calculaLetraDNI
+_calculaLetraDNIPROC FAR
+	
+	PUSH BP
+	MOV BP,SP
+
+	POP BP
+	RET
+
+ENDP _calculaLetraDNI
+
+PRINT_BYTES PROC NEAR
+;; Parámetros: 
+;	IN: 	BX:		El offset de donde está el valor.
+;			SI: 	El offset de la última posición en la que se empieza a escribir.
+;			DI: 	El número de caracteres a imprimir.
+;
+;	OUT:	Almacena en [SI] los bytes ASCII de los caracteres del número.
+;			CH guarda el número de caracteres escrito.
+;	
+;	USES: AX,BX,CL,CH,DL,DI,SI
+
+	MOV BX,0H
+	MOV CX,0H
+
+
+
+	AND [SI],BX
+	MOV BX,m
+
+
+	RET
+PRINT_BYTES ENDP
+
+
 CODE ENDS
 END START

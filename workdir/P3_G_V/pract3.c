@@ -8,6 +8,12 @@ int esFibonacci(unsigned int num);
 
 int divisiblePor4(int num);
 
+void enteroACadenaHexa (int num, char* outStr);
+
+void calculaChecksum(char* inStr, char* Check);
+
+void calculaLetraDNI(char* inStr, char* letra);
+
 int main(int argc, char const *argv[])
 {
 
