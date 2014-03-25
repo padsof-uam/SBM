@@ -116,5 +116,68 @@ INSERT_PASS_END:
 	RET
 _calculaMediana ENDP
 
+PUBLIC _esFibonacci
+
+_esFibonacci PROC FAR
+	PUSH BP
+	MOV BP,SP
+	PUSH BX CX DX
+
+	MOV CX,[BP+6]
+	MOV AX,1
+	MOV BX,1
+
+Fibonacci_start:
+	CMP AX,CX
+	JGE Fibonacci_end
+
+	; Actualizamos los valores (con un registro auxiliar)
+	MOV DX,AX
+	ADD AX,BX
+	MOV BX,DX
+	JMP Fibonacci_start
+
+Fibonacci_end:
+	SUB AX,CX
+	JZ Fibonacci_end_2
+	MOV AX,0H
+	JMP Fib_real_end
+Fibonacci_end_2:
+	MOV AX,1H
+
+Fib_real_end:
+	POP DX CX BX
+	POP BP
+	RET
+
+_esFibonacci ENDP
+
+PUBLIC _divisiblePor4 
+_divisiblePor4 PROC FAR
+	PUSH BP
+	MOV BP,SP
+	PUSH CX BX 
+
+	MOV BX,[BP+6]
+	MOV CL,14
+	SHL BX,CL
+
+tag1:
+	CMP BX,0H
+	JZ tag2
+	MOV AX,0H
+	JMP tag3
+tag2:
+	MOV AX,1H
+tag3:
+
+	POP BX CX 
+	POP BP
+	RET
+
+
+
+_divisiblePor4 ENDP
+
 CODE ENDS
 END START

@@ -11,8 +11,17 @@ int divisiblePor4(int num);
 int main(int argc, char const *argv[])
 {
 
-	unsigned int a = calculaMediana(6, 40,1,2);
 
-	printf("Potato %d\n", a);
+	printf("FIB 122  %d\n", esFibonacci(122));
+
+	printf("FIB 13  %d\n", esFibonacci(13));
+
+	printf("FIB 0  %d\n", esFibonacci(0));
+
+	printf("DIV4 16  %d\n", divisiblePor4(16));
+
+	printf("DIV4 23 %d\n", divisiblePor4(23));
+
+
 	return 0;
 }
