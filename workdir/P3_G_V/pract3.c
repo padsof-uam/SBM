@@ -17,6 +17,7 @@ void calculaLetraDNI(char* inStr, char* letra);
 int main(int argc, char const *argv[])
 {
 
+	char str[5];
 
 	printf("FIB 122  %d\n", esFibonacci(122));
 
@@ -27,6 +28,10 @@ int main(int argc, char const *argv[])
 	printf("DIV4 16  %d\n", divisiblePor4(16));
 
 	printf("DIV4 23 %d\n", divisiblePor4(23));
+
+
+	enteroACadenaHexa(10, str);
+	printf("%s\n", str);
 
 
 	return 0;

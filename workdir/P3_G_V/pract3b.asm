@@ -35,18 +35,48 @@ START ENDP
 
 
 PUBLIC _enteroACadenaHexa
-_enteroACadenaHexaPROC FAR
+_enteroACadenaHexa PROC FAR
 	
 	PUSH BP
 	MOV BP,SP
+	PUSH DX DI
+	
+	; Segment y offset del puntero.
+	MOV DI,[BP+6]
+	MOV AX,[BP+8]
+	; Inicializamos el segmento de datos al segment que nos dan.
+	PUSH DS
+	MOV DS,AX
 
+	; El numero a convertir.
+	MOV DX,[BP+10]
+	
+	; Una vez tenemos los argumentos empezamos:
+	MOV CX,4H
+	MOV BX, 000FH
+	MOV AX,DI
+main:
+	AND BX,DX
+	ADD BX,'0'
+	MOV [DI],BX
+	ADD DI,2H
+	MOV BX, 000FH
+	SHL BX,CL
+	SHL CX,CL
+	CMP BX,0F000H
+	JNZ main
+	;ponemos en el final el 0 (fin de cadena de C)
+	MOV [DI],0H
+
+	POP DS
+	POP DI DX
 	POP BP
 	RET
 
 ENDP _enteroACadenaHexa
 
 PUBLIC _calculaChecksum
-_calculaChecksumPROC FAR
+_calculaChecksum PROC FAR
 	
 	PUSH BP
 	MOV BP,SP
@@ -57,7 +87,7 @@ _calculaChecksumPROC FAR
 ENDP _calculaChecksum
 
 PUBLIC _calculaLetraDNI
-_calculaLetraDNIPROC FAR
+_calculaLetraDNI PROC FAR
 	
 	PUSH BP
 	MOV BP,SP
@@ -67,28 +97,6 @@ _calculaLetraDNIPROC FAR
 
 ENDP _calculaLetraDNI
 
-PRINT_BYTES PROC NEAR
-;; Parámetros: 
-;	IN: 	BX:		El offset de donde está el valor.
-;			SI: 	El offset de la última posición en la que se empieza a escribir.
-;			DI: 	El número de caracteres a imprimir.
-;
-;	OUT:	Almacena en [SI] los bytes ASCII de los caracteres del número.
-;			CH guarda el número de caracteres escrito.
-;	
-;	USES: AX,BX,CL,CH,DL,DI,SI
-
-	MOV BX,0H
-	MOV CX,0H
-
-
-
-	AND [SI],BX
-	MOV BX,m
-
-
-	RET
-PRINT_BYTES ENDP
 
 
 CODE ENDS
