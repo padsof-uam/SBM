@@ -128,24 +128,39 @@ _calculaLetraDNI PROC FAR
 
 	; En DS leemos y en ES escribimos el resultado.
 	MOV BX,0h
+	MOV DL,23
+	MOV BL, DS:[DI]
+	SUB BL,'0'
+	INC DI
 
 LeerDNI:
-	MOV AX,0Ah
-	MOV BL,DS:[DI]
-	SUB BL,'0'
+; [((0 * 10) + 5 )%23] * 10 + 3 ]
+	MOV AX,10
+	PUSH DX
 	MUL BL
+	POP DX
+	; AX = 0*10
+	ADD AL, DS:[DI]
+	; AX = 0*10+5
+
+	;modulo 23 en cada iteración
+	DIV DL
+	MOV AL,AH
+	XOR AH,AH
+
+	; AX = (0*10+5)%23
 	ADD CX,AX
+	MOV BX,CX
 	INC DI
 	CMP DI,SI
 	JNZ LeerDNI
 
 	; Tenemos el número en CX
 	MOV AX,CX
-	MOV CX,23
-	DIV CX
-
-	; Tenemos el código de la letra en DX.
-
+	DIV DL
+	MOV AL,AH
+	XOR AH,AH
+	; Dejamos el resultado en AX
 	POP DS 
 	
 	MOV DI,AX
@@ -155,7 +170,7 @@ LeerDNI:
 	MOV DI,[BP+10]
 	MOV ES:[DI],CL
 	INC DI
-	MOV ES:[DI],0H
+	MOV ES:[DI],byte ptr 0H
 
 	POP ES
 	POP DI CX BX AX 
