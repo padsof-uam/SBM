@@ -34,6 +34,7 @@ int main(int argc, char const *argv[])
 	enteroACadenaHexa(1551, str);
 	printf("%s\n", str);
 
+	// DNI alvaro: 02735676
 	calculaLetraDNI("05312836", str);
 	printf("%s\n", str);
 

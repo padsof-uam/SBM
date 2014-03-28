@@ -135,27 +135,28 @@ _calculaLetraDNI PROC FAR
 
 LeerDNI:
 ; [((0 * 10) + 5 )%23] * 10 + 3 ]
+; mod(mod(mod(mod(mod(mod(53,23)*10+1,23)*10+2,23)*10+8,23)*10+3,23)*10+6,23)
+; Esta forma de pensar sale bien.
 	MOV AX,10
-	PUSH DX
 	MUL BL
-	POP DX
-	; AX = 0*10
+	; Tenemos AX = 0*10
 	ADD AL, DS:[DI]
-	; AX = 0*10+5
+	SUB AL,'0'
+	; Tenemos AX = 0*10+5
 
 	;modulo 23 en cada iteración
 	DIV DL
 	MOV AL,AH
 	XOR AH,AH
 
-	; AX = (0*10+5)%23
-	ADD CX,AX
-	MOV BX,CX
+	; Tenemos AX = (0*10+5)%23
+	MOV BL,AL
 	INC DI
 	CMP DI,SI
 	JNZ LeerDNI
 
 	; Tenemos el número en CX
+suvieja:
 	MOV AX,CX
 	DIV DL
 	MOV AL,AH
