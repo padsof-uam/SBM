@@ -4,7 +4,7 @@
 
 ; DEFINICION DEL SEGMENTO DE DATOS 
 DATOS SEGMENT 
-;-- rellenar con los datos solicitados 
+	DNI DB 'T','R','W','A','G','M','Y','F','P','D','X','B','N','J','Z','S','Q','V','H','L','C','K','E'
 DATOS ENDS 
 
 ;************************************************************************** 
@@ -41,32 +41,39 @@ _enteroACadenaHexa PROC FAR
 	MOV BP,SP
 	PUSH DX DI
 	
-	; Segment y offset del puntero.
-	MOV DI,[BP+6]
-	MOV AX,[BP+8]
-	; Inicializamos el segmento de datos al segment que nos dan.
+	; Offset del puntero en el que guardar el resultado.
+	MOV DI,[BP+8]
+	; Segment del puntero en el que guardar el resultado.
+	MOV AX,[BP+10]
+	; Inicializamos el segmento de datos al segment que nos dan. 	
 	PUSH DS
 	MOV DS,AX
 
 	; El numero a convertir.
-	MOV DX,[BP+10]
+	MOV DX,[BP+6]
 	
 	; Una vez tenemos los argumentos empezamos:
 	MOV CX,4H
 	MOV BX, 000FH
-	MOV AX,DI
+	ADD DI,5h
+	MOV [DI],BYTE PTR 0H
+	DEC DI
+
 main:
 	AND BX,DX
-	ADD BX,'0'
-	MOV [DI],BX
-	ADD DI,2H
+	ADD BL,'0'
+	MOV [DI],BL
+	DEC DI
 	MOV BX, 000FH
-	SHL BX,CL
-	SHL CX,CL
-	CMP BX,0F000H
+	SHR DX,CL
+	CMP DX,0h
 	JNZ main
 	;ponemos en el final el 0 (fin de cadena de C)
-	MOV [DI],0H
+
+fill_zeros:
+	MOV [DI],BYTE PTR '0'
+	DEC DI
+	JNZ fill_zeros
 
 	POP DS
 	POP DI DX
@@ -86,12 +93,72 @@ _calculaChecksum PROC FAR
 
 ENDP _calculaChecksum
 
+
+;void calculaLetraDNI(char* inStr, char* letra)
+
 PUBLIC _calculaLetraDNI
 _calculaLetraDNI PROC FAR
 	
 	PUSH BP
 	MOV BP,SP
 
+	PUSH AX BX CX DI 
+	
+	; Offset del puntero en el que guardar el resultado.
+	;MOV DI,[BP+10]
+	
+	; Segment del puntero en el que guardar el resultado.
+	MOV AX,[BP+12]
+	; Inicializamos el segmento de datos al segment que nos dan. 	
+	PUSH ES
+	MOV ES,AX
+	
+	; Offset del puntero donde está el número.
+	MOV DI,[BP+6]
+	MOV SI,DI
+	ADD SI,8h
+	
+	; Segment del puntero donde está el número.
+	MOV AX,[BP+8]
+	
+	; Inicializamos el segmento de datos al segment que nos dan. 	
+	PUSH DS
+	MOV DS,AX
+
+
+	; En DS leemos y en ES escribimos el resultado.
+	MOV BX,0h
+
+LeerDNI:
+	MOV AX,0Ah
+	MOV BL,DS:[DI]
+	SUB BL,'0'
+	MUL BL
+	ADD CX,AX
+	INC DI
+	CMP DI,SI
+	JNZ LeerDNI
+
+	; Tenemos el número en CX
+	MOV AX,CX
+	MOV CX,23
+	DIV CX
+
+	; Tenemos el código de la letra en DX.
+
+	POP DS 
+	
+	MOV DI,AX
+	MOV CL,DNI[DI]
+
+
+	MOV DI,[BP+10]
+	MOV ES:[DI],CL
+	INC DI
+	MOV ES:[DI],0H
+
+	POP ES
+	POP DI CX BX AX 
 	POP BP
 	RET
 

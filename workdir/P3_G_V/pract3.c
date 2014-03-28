@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 unsigned int minimoComunMultiplo (unsigned int a, unsigned int b);
 
@@ -17,7 +18,7 @@ void calculaLetraDNI(char* inStr, char* letra);
 int main(int argc, char const *argv[])
 {
 
-	char str[5];
+	char * str = calloc(sizeof(char),5);
 
 	printf("FIB 122  %d\n", esFibonacci(122));
 
@@ -30,9 +31,11 @@ int main(int argc, char const *argv[])
 	printf("DIV4 23 %d\n", divisiblePor4(23));
 
 
-	enteroACadenaHexa(10, str);
+	enteroACadenaHexa(1551, str);
 	printf("%s\n", str);
 
+	calculaLetraDNI("05312836", str);
+	printf("%s\n", str);
 
 	return 0;
 }
