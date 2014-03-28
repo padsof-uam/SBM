@@ -4,7 +4,7 @@
 
 ; DEFINICION DEL SEGMENTO DE DATOS 
 DATOS SEGMENT 
-	DNI DB 'T','R','W','A','G','M','Y','F','P','D','X','B','N','J','Z','S','Q','V','H','L','C','K','E'
+	DNI DB "T","R","W","A","G","M","Y","F","P","D","X","B","N","J","Z","S","Q","V","H","L","C","K","E"
 DATOS ENDS 
 
 ;************************************************************************** 
@@ -157,14 +157,17 @@ LeerDNI:
 
 	; Tenemos el número en CX
 suvieja:
-	MOV AX,CX
+	MOV AX,BX
 	DIV DL
 	MOV AL,AH
 	XOR AH,AH
 	; Dejamos el resultado en AX
-	POP DS 
 	
 	MOV DI,AX
+
+	MOV AX,DATOS
+	MOV DS,AX
+
 	MOV CL,DNI[DI]
 
 
@@ -173,6 +176,7 @@ suvieja:
 	INC DI
 	MOV ES:[DI],byte ptr 0H
 
+	POP DS
 	POP ES
 	POP DI CX BX AX 
 	POP BP
