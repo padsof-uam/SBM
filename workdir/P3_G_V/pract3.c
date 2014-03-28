@@ -23,7 +23,7 @@ int main(int argc, char const *argv[])
 	int num;
 	int med[4];
 
-	printf("Introduzca 2 valores para calcular el minimo comun multiplo: \n");
+	/*printf("Introduzca 2 valores para calcular el minimo comun multiplo: \n");
 	scanf("%d",&med[0]);
 	scanf("%d",&med[1]);
 
@@ -62,7 +62,7 @@ int main(int argc, char const *argv[])
 		printf("El %d no es divisible por 4\n", num);
 
 	printf("\n");
-		
+	*/	
 
 	printf("Introduzca el entero para ser convertido a hexadecimal:\n");
 	scanf("%d",&num);
@@ -70,17 +70,17 @@ int main(int argc, char const *argv[])
 	printf("El numero en hexadecimal es: %s\n", str);
 
 	printf("\n");
-
+/*
 	printf("Falta el checksum\n");
 
-	printf("\n");
+*/	printf("\n");
 	// DNI alvaro: 02735676 -> X
 	// DNI dj: 05312836 -> C
 	
-	printf("Introduzca el DNI del que calcular la letra:\n");
+/*	printf("Introduzca el DNI del que calcular la letra:\n");
 	scanf("%s",dni);
 	calculaLetraDNI(dni, str);
 	printf("El dni completo es %s%s\n", dni,str);
-
+*/
 	return 0;
 }

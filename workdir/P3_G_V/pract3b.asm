@@ -61,6 +61,10 @@ _enteroACadenaHexa PROC FAR
 
 main:
 	AND BX,DX
+	CMP BL,0Ah
+	JS no_letter
+	ADD BL,'A'-'0'-10
+no_letter:
 	ADD BL,'0'
 	MOV [DI],BL
 	DEC DI
