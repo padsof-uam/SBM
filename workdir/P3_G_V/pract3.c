@@ -16,7 +16,8 @@ void calculaLetraDNI(char* inStr, char* letra);
 
 int main(int argc, char const *argv[])
 {
-
+	char bytes[] = {0x0B,0xA0,0x80,0xFA,0x92,0x6F,0x36,0xC3,0xA0,0x76,0x00};
+	char check;
 
 	printf("FIB 122  %d\n", esFibonacci(122));
 
@@ -28,6 +29,8 @@ int main(int argc, char const *argv[])
 
 	printf("DIV4 23 %d\n", divisiblePor4(23));
 
+	calculaChecksum(bytes, &check);
+	printf("Checksum de %s: %d", bytes, check);
 
 	return 0;
 }

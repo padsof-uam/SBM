@@ -35,7 +35,7 @@ START ENDP
 
 
 PUBLIC _enteroACadenaHexa
-_enteroACadenaHexaPROC FAR
+_enteroACadenaHexa PROC FAR
 	
 	PUSH BP
 	MOV BP,SP
@@ -45,19 +45,8 @@ _enteroACadenaHexaPROC FAR
 
 ENDP _enteroACadenaHexa
 
-PUBLIC _calculaChecksum
-_calculaChecksumPROC FAR
-	
-	PUSH BP
-	MOV BP,SP
-
-	POP BP
-	RET
-
-ENDP _calculaChecksum
-
 PUBLIC _calculaLetraDNI
-_calculaLetraDNIPROC FAR
+_calculaLetraDNI PROC FAR
 	
 	PUSH BP
 	MOV BP,SP
@@ -84,12 +73,41 @@ PRINT_BYTES PROC NEAR
 
 
 	AND [SI],BX
-	MOV BX,m
 
 
 	RET
 PRINT_BYTES ENDP
 
+
+PUBLIC _calculaChecksum
+_calculaChecksum PROC FAR
+	PUSH BP
+	MOV BP,SP
+	PUSH BX CX DI
+
+	MOV CX, [BP + 8]
+	MOV DI, [BP + 6]
+	MOV AX,0
+	MOV DS, CX
+CHECKSUM_LOOP:
+	MOV BX, [DI]
+	ADD AX, BX
+	CMP BX, 0H
+	INC DI
+	JNZ CHECKSUM_LOOP
+
+	MOV BX, 0100H
+	SUB BX, AX
+	MOV BX, AX
+	XOR AH, AH	
+	MOV CX, [BP + 8]
+	MOV DI, [BP + 6]
+
+
+	POP BP
+	RET
+ENDP _calculaChecksum
+	
 
 CODE ENDS
 END START
