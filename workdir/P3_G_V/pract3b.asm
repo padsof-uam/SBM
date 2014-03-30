@@ -86,18 +86,6 @@ fill_zeros:
 
 ENDP _enteroACadenaHexa
 
-PUBLIC _calculaChecksum
-_calculaChecksum PROC FAR
-	
-	PUSH BP
-	MOV BP,SP
-
-	POP BP
-	RET
-
-ENDP _calculaChecksum
-
-
 ;void calculaLetraDNI(char* inStr, char* letra)
 
 PUBLIC _calculaLetraDNI
