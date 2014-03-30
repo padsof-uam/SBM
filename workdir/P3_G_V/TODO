@@ -1,0 +1,4 @@
+en enteroACadenaHexa tener en cuenta las ABCDEF que no debería ser difícil.
+
+calculaLetraDNI está hecho sumando los dígitos, cosa que esta fatal hecha. Además lee de donde le sale de los cojones. 
+Tiene que haber alguna forma de dividir el número sin calcularlo entero... sin hacer la división 8888888/23 porque el 80000000 no cabe en registros... 
