@@ -185,25 +185,30 @@ _calculaChecksum PROC FAR
 	MOV BP,SP
 	PUSH BX CX DI
 
-	MOV CX, [BP + 8]
+	MOV BX, [BP + 8]
 	MOV DI, [BP + 6]
 	MOV AX,0
-	MOV DS, CX
+	MOV CX,0
+
+	PUSH DS
+	MOV DS, BX
 CHECKSUM_LOOP:
-	MOV BX, [DI]
-	ADD AX, BX
-	CMP BX, 0H
+	MOV CL, [DI]
+	ADD AX, CX
 	INC DI
+	CMP CX, 0H
 	JNZ CHECKSUM_LOOP
 
-	MOV BX, 0100H
-	SUB BX, AX
-	MOV BX, AX
-	XOR AH, AH	
-	MOV CX, [BP + 8]
-	MOV DI, [BP + 6]
+	MOV CX, 0100H
+	XOR AH, AH
+	SUB CX, AX
+	MOV BX, [BP + 12]
+	MOV DI, [BP + 10]
 
-
+	MOV DS, BX
+	MOV [DI], CL 
+	POP DS
+	POP DI CX BX
 	POP BP
 	RET
 ENDP _calculaChecksum
