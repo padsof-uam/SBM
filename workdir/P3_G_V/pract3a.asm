@@ -1,43 +1,19 @@
 ;************************************************************************** 
 ;Víctor de Juan Sanz y Guillermo Julián Moreno
 ;************************************************************************** 
-; DEFINICION DEL SEGMENTO DE DATOS 
-DATOS SEGMENT 
-;-- rellenar con los datos solicitados 
-DATOS ENDS 
-
-;************************************************************************** 
-; DEFINICION DEL SEGMENTO DE PILA 
-PILA SEGMENT STACK "STACK" 
-	DB 40H DUP (0) ;ejemplo de inicialización, 64 bytes inicializados a 0 
-PILA ENDS 
-
-;************************************************************************** 
-; DEFINICION DEL SEGMENTO EXTRA 
-
-EXTRA SEGMENT 
-	RESULT DW 0,0 ;ejemplo de inicialización. 2 PALABRAS (4 BYTES) 
-EXTRA ENDS 
-
 ;************************************************************************** 
 ; DEFINICION DEL SEGMENTO DE CODIGO 
 
-CODE SEGMENT 
-	ASSUME CS: CODE, DS: DATOS, ES: EXTRA, SS: PILA 
+
+CODE SEGMENT BYTE PUBLIC 'CODE'
+	ASSUME CS: CODE
+
 START PROC
+START ENDP
 
-
-	MOV AX, 4C00H 
-    INT 21H 
-
-START ENDP 
-
-
-
-PUBLIC _minimoComunMultiplo
 ;;;	Recibe 2 unsigned int por la pila.
+PUBLIC _minimoComunMultiplo
 _minimoComunMultiplo PROC FAR
-
 	;; Acceso a los parámetros/argumentos.
 	PUSH BP
 	MOV BP,SP
@@ -72,12 +48,10 @@ EUCLIDES_FIN:
 
 	POP BP
 	RET
-
 _minimoComunMultiplo ENDP
 
 
 PUBLIC _calculaMediana
-
 _calculaMediana PROC FAR
 	PUSH BP
 	MOV BP,SP
@@ -149,7 +123,6 @@ Fib_real_end:
 	POP DX CX BX
 	POP BP
 	RET
-
 _esFibonacci ENDP
 
 PUBLIC _divisiblePor4 
@@ -162,21 +135,16 @@ _divisiblePor4 PROC FAR
 	MOV CL,14
 	SHL BX,CL
 
-tag1:
 	CMP BX,0H
-	JZ tag2
+	JZ DIV_4
 	MOV AX,0H
-	JMP tag3
-tag2:
+	JMP NODIV_4
+DIV_4:
 	MOV AX,1H
-tag3:
-
+NODIV_4:
 	POP BX CX 
 	POP BP
 	RET
-
-
-
 _divisiblePor4 ENDP
 
 CODE ENDS

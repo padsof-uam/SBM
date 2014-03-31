@@ -8,24 +8,11 @@ DATOS SEGMENT
 	DNI DB "T","R","W","A","G","M","Y","F","P","D","X","B","N","J","Z","S","Q","V","H","L","C","K","E"
 DATOS ENDS 
 
-;************************************************************************** 
-; DEFINICION DEL SEGMENTO DE PILA 
-PILA SEGMENT STACK "STACK" 
-	DB 40H DUP (0) ;ejemplo de inicialización, 64 bytes inicializados a 0 
-PILA ENDS 
+CODE SEGMENT BYTE PUBLIC 'CODE'
+	ASSUME CS: CODE, DS: DATOS
 
-;************************************************************************** 
-; DEFINICION DEL SEGMENTO EXTRA 
-
-EXTRA SEGMENT 
-	RESULT DW 0,0 ;ejemplo de inicialización. 2 PALABRAS (4 BYTES) 
-EXTRA ENDS 
-
-;************************************************************************** 
-; DEFINICION DEL SEGMENTO DE CODIGO 
-
-CODE SEGMENT 
-	ASSUME CS: CODE, DS: DATOS, ES: EXTRA, SS: PILA 
+START PROC
+START ENDP
 
 PUBLIC _enteroACadenaHexa
 _enteroACadenaHexa PROC FAR
@@ -205,7 +192,6 @@ CHECKSUM_LOOP:
 	POP BP
 	RET
 ENDP _calculaChecksum
-	
 
 CODE ENDS
 END START

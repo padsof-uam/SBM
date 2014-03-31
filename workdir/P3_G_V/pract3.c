@@ -19,9 +19,16 @@ void pruebasChecksum()
 {
     char bytes[] = {0x0B, 0xA0, 0x80, 0xFA, 0x92, 0x6F, 0x36, 0xC3, 0xA0, 0x76, 0x00};
     char check;
+    char str[100];
 
     calculaChecksum(bytes, &check);
-    printf("Checksum de %s: 0x%x", bytes, check & 0xff); /* Solo queremos los bytes m.s. */
+    printf("Checksum de %s: 0x%x\n", bytes, check & 0xff); /* Solo queremos los bytes m.s. */
+
+    printf("Introduzca una cadena para calcular su checksum: ");
+    scanf("%s", str);
+    
+    calculaChecksum(str, &check);
+    printf("Checksum de %s: 0x%x\n", str, check & 0xff); /* Solo queremos los bytes m.s. */
 }
 
 void pruebasMcm()
@@ -98,12 +105,12 @@ void pruebasDNI()
 int main(int argc, char const *argv[])
 { 
 	pruebasChecksum();
-	// pruebasDNI();
-	// pruebasDivisible4();
-	// pruebasFibonacci();
-	// pruebasMcm();
-	// pruebasMediana();
-	// pruebasCadenaHexa();
+	pruebasDNI();
+	pruebasDivisible4();
+	pruebasFibonacci();
+	pruebasMcm();
+	pruebasMediana();
+	pruebasCadenaHexa();
     // DNI alvaro: 02735676 -> X
     // DNI dj: 05312836 -> C
     return 0;
