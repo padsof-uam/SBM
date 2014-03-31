@@ -4,7 +4,7 @@
 
 ; DEFINICION DEL SEGMENTO DE DATOS 
 DATOS SEGMENT 
-	; Tabla de letras para el DNI.
+	;; TABLA DE LETRAS PARA EL DNI
 	DNI DB "T","R","W","A","G","M","Y","F","P","D","X","B","N","J","Z","S","Q","V","H","L","C","K","E"
 DATOS ENDS 
 
@@ -14,6 +14,7 @@ CODE SEGMENT BYTE PUBLIC 'CODE'
 START PROC
 START ENDP
 
+;;; DEVUELVE UN CHAR* CON LA CADENA DONDE ESTA EL ENTERO ESCRITO EN HEXADECIMAL (EN ASCII)
 PUBLIC _enteroACadenaHexa
 _enteroACadenaHexa PROC FAR
 	
@@ -21,11 +22,11 @@ _enteroACadenaHexa PROC FAR
 	MOV BP,SP
 	PUSH DX DI
 	
-	; Offset del puntero en el que guardar el resultado.
+	;; Offset del puntero en el que guardar el resultado.
 	MOV DI,[BP+8]
-	; Segment del puntero en el que guardar el resultado.
+	;; Segment del puntero en el que guardar el resultado.
 	MOV AX,[BP+10]
-	; Inicializamos el segmento de datos al segment que nos dan. 	
+	;; Inicializamos el segmento de datos al segmento que nos dan. 	
 	PUSH DS
 	MOV DS,AX
 
@@ -36,6 +37,8 @@ _enteroACadenaHexa PROC FAR
 	MOV CX,4H
 	MOV BX, 000FH
 	ADD DI,5h
+	
+	;ponemos en el final el 0 (fin de cadena de C)
 	MOV [DI],BYTE PTR 0H
 	DEC DI
 
@@ -52,8 +55,8 @@ no_letter:
 	SHR DX,CL
 	CMP DX,0h
 	JNZ main
-	;ponemos en el final el 0 (fin de cadena de C)
 
+	;; RELLENAMOS LA CADENA CON 0'S EN LA IZQUIERDA (PARA NO IMPRIMIR LO QUE HUBIERA EN LA MEMORIA)
 fill_zeros:
 	MOV [DI],BYTE PTR '0'
 	DEC DI
@@ -66,8 +69,8 @@ fill_zeros:
 
 ENDP _enteroACadenaHexa
 
-;void calculaLetraDNI(char* inStr, char* letra)
 
+;;; CALCULA LA LETRA DE UN DNI PASADO COMO CHAR *.
 PUBLIC _calculaLetraDNI
 _calculaLetraDNI PROC FAR
 	
@@ -76,76 +79,75 @@ _calculaLetraDNI PROC FAR
 
 	PUSH AX BX CX DI 
 	
-	; Offset del puntero en el que guardar el resultado.
-	;MOV DI,[BP+10]
-	
-	; Segment del puntero en el que guardar el resultado.
+	;; Segment del puntero en el que guardar el resultado.
 	MOV AX,[BP+12]
-	; Inicializamos el segmento de datos al segment que nos dan. 	
+	;; Inicializamos el segmento de extra al segment que nos dan. 	
 	PUSH ES
 	MOV ES,AX
 	
-	; Offset del puntero donde está el número.
+	;; Offset del puntero donde está el número.
 	MOV DI,[BP+6]
+	;; Inicializamos los contadores.
 	MOV SI,DI
 	ADD SI,8h
 	
-	; Segment del puntero donde está el número.
+	;; Segment del puntero donde está el número.
 	MOV AX,[BP+8]
 	
-	; Inicializamos el segmento de datos al segment que nos dan. 	
+	;; Inicializamos el segmento de datos al segmento que nos dan. 	
 	PUSH DS
 	MOV DS,AX
 
 
-	; En DS leemos y en ES escribimos el resultado.
-	MOV BX,0h
+	;; En DS leemos y en ES escribimos el resultado.
+
+	MOV BX,0h ;; Marcamos con 0 el final de la cadena (centinela de C).
 	MOV DL,23
 	MOV BL, DS:[DI]
 	SUB BL,'0'
 	INC DI
 
 LeerDNI:
-; [((0 * 10) + 5 )%23] * 10 + 3 ]
-; mod(mod(mod(mod(mod(mod(53,23)*10+1,23)*10+2,23)*10+8,23)*10+3,23)*10+6,23)
-; Esta forma de pensar sale bien.
+	;; Si el DNI empieza por 053... Realizamos este calculo:
+	; [((0 * 10) + 5 )%23] * 10 + 3 ]%23
 	MOV AX,10
 	MUL BL
-	; Tenemos AX = 0*10
+	;; Tenemos AX = 0*10
 	ADD AL, DS:[DI]
 	SUB AL,'0'
-	; Tenemos AX = 0*10+5
+	;; Tenemos AX = 0*10+5
 
-	;modulo 23 en cada iteración
+	;;modulo 23 en cada iteración
 	DIV DL
 	MOV AL,AH
 	XOR AH,AH
 
-	; Tenemos AX = (0*10+5)%23
+	;; Tenemos AX = (0*10+5)%23
 	MOV BL,AL
 	INC DI
 	CMP DI,SI
 	JNZ LeerDNI
 
-	; Tenemos el número en CX
+	;; Tenemos el número en CX
 	MOV AX,BX
 	DIV DL
 	MOV AL,AH
 	XOR AH,AH
-	; Dejamos el resultado en AX
 	
+	;; Dejamos el resultado final en AX y lo almacenamos en DI para poder 
+	; utilizarlo como indice de la tabla de letras.
 	MOV DI,AX
 
+	;; Inicializamos el segmento de datos para poder leer la tabla de letras.
 	MOV AX,DATOS
 	MOV DS,AX
-
 	MOV CL,DNI[DI]
 
 
 	MOV DI,[BP+10]
-	MOV ES:[DI],CL
+	MOV ES:[DI],CL 
 	INC DI
-	MOV ES:[DI],byte ptr 0H
+	MOV ES:[DI],byte ptr 0H ; Marcamos el fin de cadena de C.
 
 	AND [SI],BX
 	POP DS

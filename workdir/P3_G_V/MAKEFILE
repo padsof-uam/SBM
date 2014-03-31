@@ -10,5 +10,5 @@ pract3b.obj: pract3b.asm
 
 clean: 
 	del *.EXE 
-	del *.MAP 
 	del *.OBJ
+	del *.LST

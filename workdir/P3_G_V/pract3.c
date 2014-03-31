@@ -1,6 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/**************************************************************************** 
+    Víctor de Juan Sanz y Guillermo Julián Moreno
+***************************************************************************/
+
 unsigned int minimoComunMultiplo (unsigned int a, unsigned int b);
 
 int calculaMediana(int a, int b, int c, int d);
@@ -60,9 +64,9 @@ void pruebasFibonacci()
     scanf("%d", &num);
 
     if (esFibonacci(num) == 1)
-        printf("El %d si pertenece a la secuencia de fibonacci\n", num);
+        printf("El %u si pertenece a la secuencia de fibonacci\n", num);
     else
-        printf("El %d no pertenece a la secuencia de fibonacci\n", num);
+        printf("El %u no pertenece a la secuencia de fibonacci\n", num);
 
 }
 
@@ -73,9 +77,9 @@ void pruebasDivisible4()
 	printf("Introduzca el numero para comprobar es divisible por 4:\n");
     scanf("%d", &num);
     if (divisiblePor4(num) == 1)
-        printf("El %d si es divisible por 4\n", num);
+        printf("El %u si es divisible por 4\n", num);
     else
-        printf("El %d no es divisible por 4\n", num);
+        printf("El %u no es divisible por 4\n", num);
 
     printf("\n");
 }
@@ -102,16 +106,17 @@ void pruebasDNI()
     printf("El dni completo es %s%s\n", dni,str);
 }
 
-int main(int argc, char const *argv[])
+int main()
 { 
+    /* Ejercicio a */
+    pruebasMcm();
+    pruebasMediana();
+    pruebasFibonacci();
+    pruebasDivisible4();
+
+    /* Ejercicio b*/
+    pruebasCadenaHexa();
 	pruebasChecksum();
 	pruebasDNI();
-	pruebasDivisible4();
-	pruebasFibonacci();
-	pruebasMcm();
-	pruebasMediana();
-	pruebasCadenaHexa();
-    // DNI alvaro: 02735676 -> X
-    // DNI dj: 05312836 -> C
     return 0;
 }

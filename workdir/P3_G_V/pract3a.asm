@@ -11,16 +11,19 @@ CODE SEGMENT BYTE PUBLIC 'CODE'
 START PROC
 START ENDP
 
-;;;	Recibe 2 unsigned int por la pila.
+;;;	RECIBE 2 UNSIGNED INT POR PILA Y CALCULA SU MINIMO COMUN MULTIPL
 PUBLIC _minimoComunMultiplo
 _minimoComunMultiplo PROC FAR
 	;; Acceso a los parámetros/argumentos.
 	PUSH BP
 	MOV BP,SP
+	PUSH BX CX
 	MOV AX,[BP+6]
 	MOV BX,[BP+8]
 
-	; Empezamos
+	;; Empezamos. Utilizamos el método de Euclides para calcular el mcd
+	; que lo utilizamos de la siguiente manera:
+	; mcm(a,b) = (a*b)/mcd(a,b)
 
 EUCLIDES:
 	CMP BX,0H
@@ -45,12 +48,12 @@ EUCLIDES_FIN:
 
 	;; TENEMOS EL RESULTADO EN DX:AX. COMO LA FUNCIÓN ES UNSIGNED INT, SOLO 
 	;	TENDREMOS EN CUENTA AX
-
+	POP CX BX
 	POP BP
 	RET
 _minimoComunMultiplo ENDP
 
-
+;;; CALCULA LA MEDIANA DE 4 ARGUMENTOS RECIBIDOS COMO PARÁMETRO.
 PUBLIC _calculaMediana
 _calculaMediana PROC FAR
 	PUSH BP
@@ -60,9 +63,9 @@ _calculaMediana PROC FAR
 	MOV DI,8H ;; ITERADOR DE "ARRIBA"
 	MOV SI,6H ;; ITERADOR DE "ABAJO"
 
+	;; ORDENAMOS LOS ARGUMENTOS RECIBIDOS CON EL ALGORITMO DE INSERT SORT.
 INSERT_SORT:
 	MOV SI,DI
-
 	MOV AX,[BP+DI]
 
 INSERT_SORT_L2:
@@ -80,6 +83,9 @@ INSERT_PASS_END:
 	CMP DI,14
 	JNZ INSERT_SORT
 
+	;; UNA VEZ ORDENADOS LOS ARGUMENTOS, CALCULAMOS LA MEDIA DE LOS 
+	; ARGUMENTOS INTERMEDIOS QUE SE ENCUENTRAN ORDENADOS EN LA PILA.
+
 	MOV AX, [BP+8]
 	ADD AX,[BP+10]
 
@@ -90,8 +96,9 @@ INSERT_PASS_END:
 	RET
 _calculaMediana ENDP
 
-PUBLIC _esFibonacci
 
+;;; COMPRUEBA SI UN NÚMERO PERTENECE A LA SECUENCIA DE FIBONACCI.
+PUBLIC _esFibonacci
 _esFibonacci PROC FAR
 	PUSH BP
 	MOV BP,SP
@@ -101,6 +108,8 @@ _esFibonacci PROC FAR
 	MOV AX,1
 	MOV BX,1
 
+	;; CALCULAMOS NUMEROS DE LA SECUENCIA DE FIBONACCI HASTA ENCONTRAR
+	; O SUPERAR EL VALOR RECIBIDO.
 Fibonacci_start:
 	CMP AX,CX
 	JGE Fibonacci_end
@@ -111,6 +120,7 @@ Fibonacci_start:
 	MOV BX,DX
 	JMP Fibonacci_start
 
+	;; UNA VEZ TENEMOS LA INFORMACIÓN DEVOLVEMOS EN AX UN 1 (SI PERTENECE) O UN 0 (SINO PERTENECE).
 Fibonacci_end:
 	SUB AX,CX
 	JZ Fibonacci_end_2
@@ -125,6 +135,8 @@ Fib_real_end:
 	RET
 _esFibonacci ENDP
 
+
+;;; RECIBE UN ARGUMENTO Y DEVUELVE 1 SI ES DIVISIBLE POR 4 O UN 0 SINO.
 PUBLIC _divisiblePor4 
 _divisiblePor4 PROC FAR
 	PUSH BP
