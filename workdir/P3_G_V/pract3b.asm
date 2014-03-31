@@ -4,6 +4,7 @@
 
 ; DEFINICION DEL SEGMENTO DE DATOS 
 DATOS SEGMENT 
+	; Tabla de letras para el DNI.
 	DNI DB "T","R","W","A","G","M","Y","F","P","D","X","B","N","J","Z","S","Q","V","H","L","C","K","E"
 DATOS ENDS 
 
@@ -25,14 +26,6 @@ EXTRA ENDS
 
 CODE SEGMENT 
 	ASSUME CS: CODE, DS: DATOS, ES: EXTRA, SS: PILA 
-START PROC
-
-
-	MOV AX, 4C00H 
-    INT 21H 
-
-START ENDP 
-
 
 PUBLIC _enteroACadenaHexa
 _enteroACadenaHexa PROC FAR
@@ -148,7 +141,6 @@ LeerDNI:
 	JNZ LeerDNI
 
 	; Tenemos el número en CX
-suvieja:
 	MOV AX,BX
 	DIV DL
 	MOV AL,AH
@@ -185,6 +177,7 @@ _calculaChecksum PROC FAR
 	MOV BP,SP
 	PUSH BX CX DI
 
+	; Guardamos el array de bytes.
 	MOV BX, [BP + 8]
 	MOV DI, [BP + 6]
 	MOV AX,0
@@ -193,19 +186,19 @@ _calculaChecksum PROC FAR
 	PUSH DS
 	MOV DS, BX
 CHECKSUM_LOOP:
-	MOV CL, [DI]
-	ADD AX, CX
-	INC DI
-	CMP CX, 0H
+	MOV CL, [DI] ; Cargamos el byte del array
+	ADD AX, CX   ; 	y sumamos al acumulador.
+	INC DI    
+	CMP CX, 0H   ; Si es cero, paramos.
 	JNZ CHECKSUM_LOOP
 
-	MOV CX, 0100H
-	XOR AH, AH
-	SUB CX, AX
+	MOV CX, 0100H 
+	XOR AH, AH   ; Nos quitamos los bytes más significativos.
+	SUB CX, AX   ;  Restamos 100 - acumulador para obtener el checksum.
 	MOV BX, [BP + 12]
 	MOV DI, [BP + 10]
 
-	MOV DS, BX
+	MOV DS, BX 
 	MOV [DI], CL 
 	POP DS
 	POP DI CX BX
