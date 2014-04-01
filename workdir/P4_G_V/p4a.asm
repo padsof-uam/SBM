@@ -18,16 +18,9 @@ PILA ENDS
 EXTRA SEGMENT 
 EXTRA ENDS 
 
-
 CODIGO SEGMENT 
-	ASSUME CS: CODIGO, DS: DATOS, ES: EXTRA, SS: PILA 
-	ORG 256
-
-START PROC
-	MOV AX, 4C00H 
-    INT 21H 
-
-START ENDP 
+	ASSUME CS: CODIGO, DS: DATOS, SS: PILA 
+	ORG 256 
 
 inicio: jmp installer
 
@@ -129,5 +122,48 @@ LAST:
 	RET
 HEX_TO_DEC ENDP
 
-codigo ENDS
+
+; Recibe en DX el carácter a buscar.
+; Devuelve en AX 1 si ha encontrado el parámetro, 0 si no.
+HAS_ARG PROC
+	PUSH BP
+	MOV BP,SP
+	PUSH BX CX
+
+	MOV SI, 81H
+	MOV BL, ES:[80H] ; Guardamos la longitud de los parámetros.
+	ADD BL, 80H 	; En BX está la primera posición que no es la cadena de parámetros.
+	MOV AX, 0 		; Inicializamos AX a 0.
+	XOR BH, BH
+AI_LOOP:
+	CMP SI, BX
+	JZ IST_END
+	MOV CL, ES:[SI]
+	INC SI
+	CMP CL, '/'
+	JNZ AI_LOOP 
+	MOV CL, ES:[SI-2]
+	CMP CL, ' '
+	JNZ AI_LOOP ; Si el anterior carácter a la barra no es un espacio, nos vamos.
+	; Tenemos algo como " /". Comprobamos el siguiente carácter
+	MOV CL, ES:[SI]
+	CMP CL, DL
+	JNZ AI_LOOP 
+	MOV AX, 1
+	; Es igual al carácter que buscábamos. Comprobemos si tenemos algún carácter por detrás...
+	MOV CL, ES:[SI+1]
+	CMP CL, ' '
+	JZ IST_END ; Un espacio nos vale
+	CMP CL, 0DH
+	JZ IST_END ; Un retorno de carro también
+	MOV AX, 0
+	JMP AI_LOOP ; Otras cosas no nos valen. Seguimos con el bucle.
+
+IST_END:
+	POP CX BX
+	POP BP
+	RET
+HAS_ARG ENDP
+
+CODIGO ENDS
 END inicio
