@@ -3,58 +3,122 @@
 ;	Víctor de Juan Sanz y Guillermo Julián Moreno
 ;************************************************************************** 
 
-DATOS SEGMENT 
-	AUTORES DB "Víctor de Juan Sanz y Guillermo Julián Moreno"
-	USO DB "Ejecuta el programa con /I para instalar",0AH,"Ejecuta el programa con /D para instalar",0Ah
-	ESTADO DB "El estado del driver es: "
-	INSTALADO DB "instalado"
-	DESINSTALADO DB "desinstalado"
-DATOS ENDS 
-
-PILA SEGMENT STACK "STACK" 
-	DB 40H DUP (0) ;ejemplo de inicialización, 64 bytes inicializados a 0 
-PILA ENDS 
-
-EXTRA SEGMENT 
-EXTRA ENDS 
-
 CODIGO SEGMENT 
-	ASSUME CS: CODIGO, DS: DATOS, SS: PILA 
-	ORG 256 
-
-inicio: jmp installer
-
+	ASSUME CS: CODIGO
+	ORG 256
+inicio:
+	jmp real_inicio
 ;; Definicion de variables globales
 	tabla DB 'abcdf'
 	flag DW 0
+	AUTORES DB "Víctor de Juan Sanz y Guillermo Julián Moreno","$"
+	USO DB "Ejecuta el programa con /I para instalar",0AH,"Ejecuta el programa con /D para instalar",0Ah,"$"
+	ESTADO DB "El estado del driver es: ","$"
+	INSTALADO DB "instalado","$"
+	DESINSTALADO DB "desinstalado","$"
+	BUFFER DB 15 dup ("$")
+	END_BUFFER DB "$"
+	DECIMAL DB "15"
+	HEXADECIMAL DW 36h
+
+real_inicio:
+	MOV AX,0
+	;; Buscamos la I
+	MOV DL,'I'
+	call HAS_ARG
+	cmp AX,1
+	jz install
+
+	MOV DL,'D'
+	call HAS_ARG
+	cmp AX,1
+	jz uninstall
+
+help:
+	PUSH DS
+	MOV AX,CS
+	MOV DS,AX
+	MOV AH,9h
+	MOV DX,OFFSET USO
+	INT 21h
+	POP DS
+	jmp fin_main
+
+install:
+	;call instalador
+	PUSH DS
+	MOV AX,CS
+	MOV DS,AX
+	MOV AH,9h
+	MOV DX,OFFSET INSTALADO
+	INT 21h
+	POP DS
+	jmp fin_main
+
+uninstall:
+	PUSH DS
+	MOV AX,CS
+	MOV DS,AX
+	MOV AH,9h
+	MOV DX,OFFSET DESINSTALADO
+	INT 21h
+	POP DS
+	;call desinstalador
+	jmp fin_main
+
+fin_main:
+
+	PUSH DS
+	MOV AX,CS
+	MOV DS,AX
+	MOV DX,OFFSET DECIMAL
+	MOV AH,12
+	call routine
+	
+	MOV DX, OFFSET HEXADECIMAL
+	MOV AH,13
+	call routine
+
+	POP DS
+	MOV AX, 4C00H 
+    INT 21H 
 
 
 ;; Rutina de servicio a la interrupción
-routine PROC FAR
+routine PROC 
+	
 	;; Salva registros modificados
 	push BX
 
-	;; Instrucciones de la rutina
+	cmp AH,12
+	jz dectohex
 
+	cmp AH,13
+	jz hextodec
+
+	jmp fin
 	;; Recupera registros modificados
+dectohex:
+
+
+	jmp fin
+hextodec:
+
+	MOV BX,DX
+	MOV SI,OFFSET END_BUFFER
+	MOV DI, 1h
+
+	call HEX_TO_DEC
+
+	MOV AH,9
+	MOV DX,SI
+	INT 21H
+	;jmp fin
+fin:
 	pop BX
-	iret
+	ret
 routine ENDP
 
-
-instalador PROC
-	mov ax, 0
-	mov es, ax
-	mov ax, OFFSET routine
-	mov bx, cs
-	cli
-	mov es:[ 60h*4 ], ax
-	mov es:[ 60h*4+2 ], bx
-	sti
-	mov dx, OFFSET instalador
-	int 27h ; Acaba y deja residente descartando el codigo que no interesa.
-	;; PSP, variables y rutina routine.
-instalador ENDP
 
 desinstalador PROC 
 	;; Desinstala routine de INT 60h
@@ -76,6 +140,21 @@ desinstalador PROC
 	ret
 desinstalador ENDP
 
+instalador PROC
+	mov ax, 0
+	mov es, ax
+	mov ax, OFFSET routine
+	mov bx, cs
+	cli
+	mov es:[ 60h*4 ], ax
+	mov es:[ 60h*4+2 ], bx
+	sti
+	mov dx, OFFSET instalador
+	int 27h ; Acaba y deja residente descartando el codigo que no interesa.
+	;; PSP, variables y rutina routine.
+instalador ENDP
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;PRINT PROCEDURE;;;;;;;;;;;;;;;;;;;;;;
 HEX_TO_DEC PROC NEAR
 ;; Parámetros: 
@@ -91,20 +170,20 @@ HEX_TO_DEC PROC NEAR
 MAIN:
 	MOV AX,[BX+DI-1]
 	JS  NEG_CORRECTED
-	NEG AX
+	;NEG AX
 	MOV DL,0H
 NEG_CORRECTED:
 CONVERT:
     XOR AH,AH
 	DIV CL
-	ADD AH,'0'
+	SUB AH,'0'
 	DEC SI
 	MOV [SI],AH
 	INC CH
 	AND AL, AL
-	JNZ CONVERT_BYTE
+	JNZ CONVERT
 	DEC DI
-	JZ LAST_BYTE
+	JZ LAST
 	CMP DL,0H
 	JNZ NO_MINUS
 	MOV DL,1H
@@ -130,7 +209,7 @@ HAS_ARG PROC
 	MOV BP,SP
 	PUSH BX CX
 
-	MOV SI, 81H
+	MOV SI, 80H
 	MOV BL, ES:[80H] ; Guardamos la longitud de los parámetros.
 	ADD BL, 80H 	; En BX está la primera posición que no es la cadena de parámetros.
 	MOV AX, 0 		; Inicializamos AX a 0.

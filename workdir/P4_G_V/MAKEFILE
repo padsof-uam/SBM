@@ -3,10 +3,10 @@ all: a b c
 a: p4a.exe 
 
 p4a.exe: p4a.obj
-    tlink /v p4a
+    tlink /t p4a
 
 p4a.obj: p4a.asm
-    tasm /zi p4a
+    tasm /zi /m p4a
 
 
 b: p4b.exe 
