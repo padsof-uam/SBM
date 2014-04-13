@@ -30,3 +30,4 @@ clean:
 	del *.EXE 
 	del *.MAP 
 	del *.OBJ
+	del *.COM

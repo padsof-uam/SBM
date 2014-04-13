@@ -17,9 +17,9 @@ inicio:
 	INSTALADO DB "instalado","$"
 	DESINSTALADO DB "desinstalado","$"
 	BUFFER DB 15 dup ("$")
-	END_BUFFER DB "$"
-	DECIMAL DB "15"
-	HEXADECIMAL DW 36h
+	END_BUFFER DB 0Ah,"$"
+	DECIMAL DW 167
+	HEXADECIMAL DW 0FEDCh
 
 real_inicio:
 	MOV AX,0
@@ -100,6 +100,12 @@ routine PROC
 	;; Recupera registros modificados
 dectohex:
 
+	MOV CX,10H
+	MOV BX,DX
+	MOV SI,OFFSET END_BUFFER
+	MOV DI, 1h
+
+	call CONVERT2BASE
 
 	jmp fin
 hextodec:
@@ -107,14 +113,17 @@ hextodec:
 	MOV BX,DX
 	MOV SI,OFFSET END_BUFFER
 	MOV DI, 1h
+	MOV CX,0AH
 
-	call HEX_TO_DEC
 
+	call CONVERT2BASE
+
+	;jmp fin
+fin:
 	MOV AH,9
 	MOV DX,SI
 	INT 21H
-	;jmp fin
-fin:
+
 	pop BX
 	ret
 routine ENDP
@@ -156,50 +165,40 @@ instalador ENDP
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;PRINT PROCEDURE;;;;;;;;;;;;;;;;;;;;;;
-HEX_TO_DEC PROC NEAR
+CONVERT2BASE PROC NEAR
 ;; Parámetros: 
 ;	IN: 	BX:		El offset de donde está el valor.
 ;			SI: 	El offset de la última posición en la que se empieza a escribir.
 ;			DI: 	El número de caracteres a imprimir.
+;			CX: 	La base a la que convertir.
 ;
 ;	OUT:	Almacena en DS:[SI] los bytes ASCII de los caracteres del número.
 ;	
 ;	USES: AX,BX,CL,CH,DL,DI,SI 
-	MOV DL,1H
-	MOV CL,0AH
 MAIN:
 	MOV AX,[BX+DI-1]
-	JS  NEG_CORRECTED
-	;NEG AX
-	MOV DL,0H
-NEG_CORRECTED:
 CONVERT:
-    XOR AH,AH
-	DIV CL
-	SUB AH,'0'
+	XOR DX,DX
+	DIV CX
+	;; El resto que es lo que nos interesa está en AX.
+	;	Nos quedamos con 1 byte para pasarlo a ASCII.
+    XOR DH,DH
+	ADD DL,'0'
+	;; Procedemos a corregir si es una letra:
+    CMP DL,'9'
+    JBE STORE
+    ADD DL,'A'-'0'-10
+STORE:	;; Lo escribimos en memoria.
 	DEC SI
-	MOV [SI],AH
-	INC CH
-	AND AL, AL
+	MOV [SI],DL
+	CMP AX, 0h
 	JNZ CONVERT
 	DEC DI
-	JZ LAST
-	CMP DL,0H
-	JNZ NO_MINUS
-	MOV DL,1H
-	INC DL
-	INC CH
-	DEC SI
-	MOV [SI],BYTE PTR '-'
-NO_MINUS:	
-	DEC SI
-	INC CH
-	MOV [SI],BYTE PTR ','
 LAST:
 	CMP DI,0H
 	JNZ MAIN
 	RET
-HEX_TO_DEC ENDP
+CONVERT2BASE ENDP
 
 
 ; Recibe en DX el carácter a buscar.
