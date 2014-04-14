@@ -18,8 +18,8 @@ inicio:
 	DESINSTALADO DB "desinstalado","$"
 	BUFFER DB 15 dup ("$")
 	END_BUFFER DB 0Ah,"$"
-	DECIMAL DW 167
-	HEXADECIMAL DW 0FEDCh
+	DECIMAL DB "167","$"
+	HEXADECIMAL DB "FFFF","$"
 
 real_inicio:
 	MOV AX,0
@@ -71,13 +71,17 @@ fin_main:
 	PUSH DS
 	MOV AX,CS
 	MOV DS,AX
+
+
 	MOV DX,OFFSET DECIMAL
 	MOV AH,12
 	call routine
 	
+
 	MOV DX, OFFSET HEXADECIMAL
 	MOV AH,13
 	call routine
+
 
 	POP DS
 	MOV AX, 4C00H 
@@ -86,9 +90,10 @@ fin_main:
 
 ;; Rutina de servicio a la interrupción
 routine PROC 
-	
 	;; Salva registros modificados
-	push BX
+	push SI BX CX
+
+	MOV BX,DX ;; En DX está el offset de la cadena a convertir.
 
 	cmp AH,12
 	jz dectohex
@@ -100,22 +105,24 @@ routine PROC
 	;; Recupera registros modificados
 dectohex:
 
-	MOV CX,10H
-	MOV BX,DX
-	MOV SI,OFFSET END_BUFFER
-	MOV DI, 1h
+	MOV CX,10
+	CALL STRTOINT
 
-	call CONVERT2BASE
+	;; tenemos en BX el valor a convertir en ASCII imprimible.
+
+	MOV SI,OFFSET END_BUFFER
+	MOV CX,10h
+	CALL CONVERT2BASE
 
 	jmp fin
 hextodec:
 
-	MOV BX,DX
+
+	MOV CX,10h
+	CALL STRTOINT
+
 	MOV SI,OFFSET END_BUFFER
-	MOV DI, 1h
 	MOV CX,0AH
-
-
 	call CONVERT2BASE
 
 	;jmp fin
@@ -124,7 +131,7 @@ fin:
 	MOV DX,SI
 	INT 21H
 
-	pop BX
+	pop CX BX SI
 	ret
 routine ENDP
 
@@ -164,20 +171,17 @@ instalador PROC
 instalador ENDP
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;PRINT PROCEDURE;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;PROCEDURES;;;;;;;;;;;;;;;;;;;;;;
 CONVERT2BASE PROC NEAR
 ;; Parámetros: 
-;	IN: 	BX:		El offset de donde está el valor.
+;	IN: 	AX:		El valor.
 ;			SI: 	El offset de la última posición en la que se empieza a escribir.
-;			DI: 	El número de caracteres a imprimir.
 ;			CX: 	La base a la que convertir.
 ;
 ;	OUT:	Almacena en DS:[SI] los bytes ASCII de los caracteres del número.
 ;	
-;	USES: AX,BX,CL,CH,DL,DI,SI 
-MAIN:
-	MOV AX,[BX+DI-1]
-CONVERT:
+;	USES: AX,BX,CL,CH,DL,SI 
+MAIN_CNV2B:
 	XOR DX,DX
 	DIV CX
 	;; El resto que es lo que nos interesa está en AX.
@@ -192,13 +196,39 @@ STORE:	;; Lo escribimos en memoria.
 	DEC SI
 	MOV [SI],DL
 	CMP AX, 0h
-	JNZ CONVERT
-	DEC DI
-LAST:
-	CMP DI,0H
-	JNZ MAIN
+	JNZ MAIN_CNV2B
 	RET
 CONVERT2BASE ENDP
+
+STRTOINT PROC NEAR
+;; Parámetros: 
+;	IN: 	BX:		El offset de donde está la cadena a convertir.
+;			CX: 	La base en la que está el número.
+;
+;	OUT:	AX: 	Número convertido.
+;	
+	PUSH DI DX
+	MOV DI,0h
+	MOV AX,0h
+MAIN_STRTOINT:
+	MUL CX
+	MOV DL,[BX+DI]
+	; Corregimos si se trata de una letra.
+    CMP DL,'9'
+    JBE NOTLETTER_STOI
+    SUB DL,'A'-'0'-10
+NOTLETTER_STOI:	
+	ADD AL,DL
+	SUB AL,'0'
+	INC DI
+	MOV DL,[BX + DI]
+	CMP DL,"$"
+	JNZ MAIN_STRTOINT
+	; Tenemos el número en AX.	
+	POP DX DI
+	RET
+STRTOINT ENDP
+
 
 
 ; Recibe en DX el carácter a buscar.

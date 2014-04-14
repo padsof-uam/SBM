@@ -1,11 +1,9 @@
 Ya reconoce bien los argumentos. 
 
-Convierte un número hexadecimal (no una cadena) para imprimir en decimal bien y lo mismo al revés.
+Convierte una cadena decimal o hexadecimal en ascii imprimible bien.
 
-Falta:
- Mirar que cada rutina haga lo que tiene que hacer. Que hay que convertir una cadena hexa a decimal. pero.... ¿hasta qué limite? Porque convertir "AAAFB1905" a decimal me parece bastante inmanejable... ¿sólo un word y ya?
- Lo mismo en la viceversa xD (de dec a hexa)
+Como mucho se convierten cadenas hexa hasta FFFF o cadenas decimales hasta 65535. Se podría conseguir el siguiente nivel pero me da mazo pereza (trabajar con DX:AX en vez de con AX solamente)
 
-Además:
-	- Instalar.
-	- Comprobar la instalación.
+FALTA:
+	- Instalar y comprobar la instalación.
+	- Estan los códigos por separado, falta juntarlo todo como tiene que ser.
