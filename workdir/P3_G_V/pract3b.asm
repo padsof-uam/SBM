@@ -128,7 +128,7 @@ LeerDNI:
 	CMP DI,SI
 	JNZ LeerDNI
 
-	;; Tenemos el número en CX
+	;; Tenemos el número en BX
 	MOV AX,BX
 	DIV DL
 	MOV AL,AH

@@ -1,0 +1,9 @@
+Ya reconoce bien los argumentos. 
+
+Convierte una cadena decimal o hexadecimal en ascii imprimible bien.
+
+Como mucho se convierten cadenas hexa hasta FFFF o cadenas decimales hasta 65535. Se podría conseguir el siguiente nivel pero me da mazo pereza (trabajar con DX:AX en vez de con AX solamente)
+
+FALTA:
+	- Instalar y comprobar la instalación.
+	- Estan los códigos por separado, falta juntarlo todo como tiene que ser.

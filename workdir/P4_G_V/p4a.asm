@@ -3,58 +3,138 @@
 ;	Víctor de Juan Sanz y Guillermo Julián Moreno
 ;************************************************************************** 
 
-DATOS SEGMENT 
-	AUTORES DB "Víctor de Juan Sanz y Guillermo Julián Moreno"
-	USO DB "Ejecuta el programa con /I para instalar",0AH,"Ejecuta el programa con /D para instalar",0Ah
-	ESTADO DB "El estado del driver es: "
-	INSTALADO DB "instalado"
-	DESINSTALADO DB "desinstalado"
-DATOS ENDS 
-
-PILA SEGMENT STACK "STACK" 
-	DB 40H DUP (0) ;ejemplo de inicialización, 64 bytes inicializados a 0 
-PILA ENDS 
-
-EXTRA SEGMENT 
-EXTRA ENDS 
-
 CODIGO SEGMENT 
-	ASSUME CS: CODIGO, DS: DATOS, SS: PILA 
-	ORG 256 
-
-inicio: jmp installer
-
+	ASSUME CS: CODIGO
+	ORG 256
+inicio:
+	jmp real_inicio
 ;; Definicion de variables globales
 	tabla DB 'abcdf'
 	flag DW 0
+	AUTORES DB "Víctor de Juan Sanz y Guillermo Julián Moreno","$"
+	USO DB "Ejecuta el programa con /I para instalar",0AH,"Ejecuta el programa con /D para instalar",0Ah,"$"
+	ESTADO DB "El estado del driver es: ","$"
+	INSTALADO DB "instalado","$"
+	DESINSTALADO DB "desinstalado","$"
+	BUFFER DB 15 dup ("$")
+	END_BUFFER DB 0Ah,"$"
+	DECIMAL DB "167","$"
+	HEXADECIMAL DB "FFFF","$"
+
+real_inicio:
+	MOV AX,0
+	;; Buscamos la I
+	MOV DL,'I'
+	call HAS_ARG
+	cmp AX,1
+	jz install
+
+	MOV DL,'D'
+	call HAS_ARG
+	cmp AX,1
+	jz uninstall
+
+help:
+	PUSH DS
+	MOV AX,CS
+	MOV DS,AX
+	MOV AH,9h
+	MOV DX,OFFSET USO
+	INT 21h
+	POP DS
+	jmp fin_main
+
+install:
+	;call instalador
+	PUSH DS
+	MOV AX,CS
+	MOV DS,AX
+	MOV AH,9h
+	MOV DX,OFFSET INSTALADO
+	INT 21h
+	POP DS
+	jmp fin_main
+
+uninstall:
+	PUSH DS
+	MOV AX,CS
+	MOV DS,AX
+	MOV AH,9h
+	MOV DX,OFFSET DESINSTALADO
+	INT 21h
+	POP DS
+	;call desinstalador
+	jmp fin_main
+
+fin_main:
+
+	PUSH DS
+	MOV AX,CS
+	MOV DS,AX
+
+
+	MOV DX,OFFSET DECIMAL
+	MOV AH,12
+	call routine
+	
+
+	MOV DX, OFFSET HEXADECIMAL
+	MOV AH,13
+	call routine
+
+
+	POP DS
+	MOV AX, 4C00H 
+    INT 21H 
 
 
 ;; Rutina de servicio a la interrupción
-routine PROC FAR
+routine PROC 
 	;; Salva registros modificados
-	push BX
+	push SI BX CX
 
-	;; Instrucciones de la rutina
+	MOV BX,DX ;; En DX está el offset de la cadena a convertir.
 
+	cmp AH,12
+	jz dectohex
+
+	cmp AH,13
+	jz hextodec
+
+	jmp fin
 	;; Recupera registros modificados
-	pop BX
-	iret
+dectohex:
+
+	MOV CX,10
+	CALL STRTOINT
+
+	;; tenemos en BX el valor a convertir en ASCII imprimible.
+
+	MOV SI,OFFSET END_BUFFER
+	MOV CX,10h
+	CALL CONVERT2BASE
+
+	jmp fin
+hextodec:
+
+
+	MOV CX,10h
+	CALL STRTOINT
+
+	MOV SI,OFFSET END_BUFFER
+	MOV CX,0AH
+	call CONVERT2BASE
+
+	;jmp fin
+fin:
+	MOV AH,9
+	MOV DX,SI
+	INT 21H
+
+	pop CX BX SI
+	ret
 routine ENDP
 
-
-instalador PROC
-	mov ax, 0
-	mov es, ax
-	mov ax, OFFSET routine
-	mov bx, cs
-	cli
-	mov es:[ 60h*4 ], ax
-	mov es:[ 60h*4+2 ], bx
-	sti
-	mov dx, OFFSET instalador
-	int 27h ; Acaba y deja residente descartando el codigo que no interesa.
-	;; PSP, variables y rutina routine.
-instalador ENDP
 
 desinstalador PROC 
 	;; Desinstala routine de INT 60h
@@ -76,51 +156,79 @@ desinstalador PROC
 	ret
 desinstalador ENDP
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;PRINT PROCEDURE;;;;;;;;;;;;;;;;;;;;;;
-HEX_TO_DEC PROC NEAR
+instalador PROC
+	mov ax, 0
+	mov es, ax
+	mov ax, OFFSET routine
+	mov bx, cs
+	cli
+	mov es:[ 60h*4 ], ax
+	mov es:[ 60h*4+2 ], bx
+	sti
+	mov dx, OFFSET instalador
+	int 27h ; Acaba y deja residente descartando el codigo que no interesa.
+	;; PSP, variables y rutina routine.
+instalador ENDP
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;PROCEDURES;;;;;;;;;;;;;;;;;;;;;;
+CONVERT2BASE PROC NEAR
 ;; Parámetros: 
-;	IN: 	BX:		El offset de donde está el valor.
+;	IN: 	AX:		El valor.
 ;			SI: 	El offset de la última posición en la que se empieza a escribir.
-;			DI: 	El número de caracteres a imprimir.
+;			CX: 	La base a la que convertir.
 ;
 ;	OUT:	Almacena en DS:[SI] los bytes ASCII de los caracteres del número.
 ;	
-;	USES: AX,BX,CL,CH,DL,DI,SI 
-	MOV DL,1H
-	MOV CL,0AH
-MAIN:
-	MOV AX,[BX+DI-1]
-	JS  NEG_CORRECTED
-	NEG AX
-	MOV DL,0H
-NEG_CORRECTED:
-CONVERT:
-    XOR AH,AH
-	DIV CL
-	ADD AH,'0'
+;	USES: AX,BX,CL,CH,DL,SI 
+MAIN_CNV2B:
+	XOR DX,DX
+	DIV CX
+	;; El resto que es lo que nos interesa está en AX.
+	;	Nos quedamos con 1 byte para pasarlo a ASCII.
+    XOR DH,DH
+	ADD DL,'0'
+	;; Procedemos a corregir si es una letra:
+    CMP DL,'9'
+    JBE STORE
+    ADD DL,'A'-'0'-10
+STORE:	;; Lo escribimos en memoria.
 	DEC SI
-	MOV [SI],AH
-	INC CH
-	AND AL, AL
-	JNZ CONVERT_BYTE
-	DEC DI
-	JZ LAST_BYTE
-	CMP DL,0H
-	JNZ NO_MINUS
-	MOV DL,1H
-	INC DL
-	INC CH
-	DEC SI
-	MOV [SI],BYTE PTR '-'
-NO_MINUS:	
-	DEC SI
-	INC CH
-	MOV [SI],BYTE PTR ','
-LAST:
-	CMP DI,0H
-	JNZ MAIN
+	MOV [SI],DL
+	CMP AX, 0h
+	JNZ MAIN_CNV2B
 	RET
-HEX_TO_DEC ENDP
+CONVERT2BASE ENDP
+
+STRTOINT PROC NEAR
+;; Parámetros: 
+;	IN: 	BX:		El offset de donde está la cadena a convertir.
+;			CX: 	La base en la que está el número.
+;
+;	OUT:	AX: 	Número convertido.
+;	
+	PUSH DI DX
+	MOV DI,0h
+	MOV AX,0h
+MAIN_STRTOINT:
+	MUL CX
+	MOV DL,[BX+DI]
+	; Corregimos si se trata de una letra.
+    CMP DL,'9'
+    JBE NOTLETTER_STOI
+    SUB DL,'A'-'0'-10
+NOTLETTER_STOI:	
+	ADD AL,DL
+	SUB AL,'0'
+	INC DI
+	MOV DL,[BX + DI]
+	CMP DL,"$"
+	JNZ MAIN_STRTOINT
+	; Tenemos el número en AX.	
+	POP DX DI
+	RET
+STRTOINT ENDP
+
 
 
 ; Recibe en DX el carácter a buscar.
@@ -130,7 +238,7 @@ HAS_ARG PROC
 	MOV BP,SP
 	PUSH BX CX
 
-	MOV SI, 81H
+	MOV SI, 80H
 	MOV BL, ES:[80H] ; Guardamos la longitud de los parámetros.
 	ADD BL, 80H 	; En BX está la primera posición que no es la cadena de parámetros.
 	MOV AX, 0 		; Inicializamos AX a 0.
