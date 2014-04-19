@@ -11,16 +11,18 @@ inicio:
 ;; Definicion de variables globales
 	tabla DB 'abcdf'
 	flag DW 0
-	AUTORES DB "Víctor de Juan Sanz y Guillermo Julián Moreno","$"
+	AUTORES DB "Victor de Juan Sanz y Guillermo Julian Moreno","$"
 	USO DB "Ejecuta el programa con /I para instalar",0AH,"Ejecuta el programa con /D para instalar",0Ah,"$"
 	ESTADO DB "El estado del driver es: ","$"
-	INSTALADO DB "instalado","$"
-	DESINSTALADO DB "desinstalado","$"
-	BUFFER DB 15 dup ("$")
-	END_BUFFER DB 0Ah,"$"
+	INSTALADO DB "instalado",0AH,"$"
+	DESINSTALADO DB "desinstalado",0AH,"$"
+	PRUEBAS DB	"Pruebas de la rutina (sin llamada a interrupcion): ", 0AH, "$"
 	DECIMAL DB "167","$"
 	HEXADECIMAL DB "FFFF","$"
-
+	BUFFER DB 15 dup ("$")
+	END_BUFFER DB 0Ah,"$"
+	RUT_STATS  DB "Interrupcion 60H tomando el control. Wololololo", 0AH, "$"	
+	PING 	DB "PING", 0AH, 0AH, "$"
 real_inicio:
 	MOV AX,0
 	;; Buscamos la I
@@ -45,17 +47,18 @@ help:
 	jmp fin_main
 
 install:
-	;call instalador
+	call instalador
 	PUSH DS
-	MOV AX,CS
-	MOV DS,AX
-	MOV AH,9h
+	MOV AX, CS
+	MOV DS, AX
+	MOV AH, 9h
 	MOV DX,OFFSET INSTALADO
 	INT 21h
 	POP DS
 	jmp fin_main
 
 uninstall:
+	call desinstalador
 	PUSH DS
 	MOV AX,CS
 	MOV DS,AX
@@ -63,46 +66,72 @@ uninstall:
 	MOV DX,OFFSET DESINSTALADO
 	INT 21h
 	POP DS
-	;call desinstalador
 	jmp fin_main
 
 fin_main:
+	; PUSH DS
+	; MOV AX,CS
+	; MOV DS,AX
 
-	PUSH DS
-	MOV AX,CS
-	MOV DS,AX
+	; MOV AH,9h
+	; MOV DX,OFFSET PRUEBAS
+	; INT 21h
 
-
-	MOV DX,OFFSET DECIMAL
-	MOV AH,12
-	call routine
+	; MOV DX,OFFSET DECIMAL
+	; MOV AH,12
+	; CALL routine
 	
 
-	MOV DX, OFFSET HEXADECIMAL
-	MOV AH,13
-	call routine
+	; MOV DX, OFFSET HEXADECIMAL
+	; MOV AH,13
+	; CALL routine
 
-
-	POP DS
+	; POP DS
+	
 	MOV AX, 4C00H 
     INT 21H 
 
+
+STAT PROC
+	PUSH AX DX CX
+	MOV CX, DS
+	MOV AX,CS
+	MOV DS,AX
+
+	MOV AH,9h
+	MOV DX, OFFSET PING
+	INT 21H
+	MOV DS, CX
+	POP CX DX AX
+	RET
+STAT ENDP
 
 ;; Rutina de servicio a la interrupción
 routine PROC 
 	;; Salva registros modificados
 	push SI BX CX
+	MOV CX, DS
+	PUSH CX
 
-	MOV BX,DX ;; En DX está el offset de la cadena a convertir.
+	; PUSH AX DX 
+	; MOV AX,CS
+	; MOV DS,AX
 
-	cmp AH,12
+	; MOV AH,9h
+	; MOV DX, OFFSET RUT_STATS
+	; INT 21H
+	; POP DX AX
+
+	MOV BX, DX ;; En DX está el offset de la cadena a convertir.
+
+	cmp AH, 12
 	jz dectohex
 
-	cmp AH,13
+	cmp AH, 13
 	jz hextodec
 
 	jmp fin
-	;; Recupera registros modificados
+
 dectohex:
 
 	MOV CX,10
@@ -110,66 +139,33 @@ dectohex:
 
 	;; tenemos en BX el valor a convertir en ASCII imprimible.
 
-	MOV SI,OFFSET END_BUFFER
-	MOV CX,10h
+	MOV SI, OFFSET END_BUFFER
+	MOV CX, 10h
 	CALL CONVERT2BASE
 
 	jmp fin
+
 hextodec:
-
-
 	MOV CX,10h
 	CALL STRTOINT
 
-	MOV SI,OFFSET END_BUFFER
-	MOV CX,0AH
+	MOV SI, OFFSET END_BUFFER
+	MOV CX, 0AH
 	call CONVERT2BASE
 
 	;jmp fin
 fin:
-	MOV AH,9
-	MOV DX,SI
+	MOV AX, CS
+	MOV DS, AX
+	MOV AH, 9
+	MOV DX, SI
 	INT 21H
 
-	pop CX BX SI
-	ret
+	POP CX
+	MOV DS, CX
+	POP CX BX SI
+	IRET
 routine ENDP
-
-
-desinstalador PROC 
-	;; Desinstala routine de INT 60h
-	push ax bx cx ds es
-	mov cx, 0
-	mov ds, cx ; Segmento de vectores interrupción
-	mov es, ds:[ 60h*4+2 ] ; Lee segmento de routine
-	mov	bx, es:[ 2Ch ] ; Lee segmento de entorno del PSP de routine
-	mov	ah, 49h 
-	int	21h ; Libera segmento de routine (es)
-	mov	es, bx
-	int	21h ; Libera segmento de variables de entorno de routine
-	;; Pone a cero vector de interrupción 60h
-	cli
-	mov	ds:[ 60h*4 ], cx ; cx = 0
-	mov	ds:[ 60h*4+2 ], cx
-	sti
-	pop es ds cx bx ax
-	ret
-desinstalador ENDP
-
-instalador PROC
-	mov ax, 0
-	mov es, ax
-	mov ax, OFFSET routine
-	mov bx, cs
-	cli
-	mov es:[ 60h*4 ], ax
-	mov es:[ 60h*4+2 ], bx
-	sti
-	mov dx, OFFSET instalador
-	int 27h ; Acaba y deja residente descartando el codigo que no interesa.
-	;; PSP, variables y rutina routine.
-instalador ENDP
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;PROCEDURES;;;;;;;;;;;;;;;;;;;;;;
 CONVERT2BASE PROC NEAR
@@ -194,6 +190,7 @@ MAIN_CNV2B:
     ADD DL,'A'-'0'-10
 STORE:	;; Lo escribimos en memoria.
 	DEC SI
+	CALL STAT
 	MOV [SI],DL
 	CMP AX, 0h
 	JNZ MAIN_CNV2B
@@ -207,6 +204,7 @@ STRTOINT PROC NEAR
 ;
 ;	OUT:	AX: 	Número convertido.
 ;	
+	CALL STAT
 	PUSH DI DX
 	MOV DI,0h
 	MOV AX,0h
@@ -229,6 +227,39 @@ NOTLETTER_STOI:
 	RET
 STRTOINT ENDP
 
+instalador PROC
+	mov ax, 0
+	mov es, ax
+	mov ax, OFFSET routine
+	mov bx, cs
+	cli
+	mov es:[ 60h*4 ], ax
+	mov es:[ 60h*4+2 ], bx
+	sti
+	mov dx, OFFSET instalador
+	int 27h ; Acaba y deja residente descartando el codigo que no interesa.
+	;; PSP, variables y rutina routine.
+instalador ENDP
+
+desinstalador PROC 
+	;; Desinstala routine de INT 60h
+	push ax bx cx ds es
+	mov cx, 0
+	mov ds, cx ; Segmento de vectores interrupción
+	mov es, ds:[ 60h*4+2 ] ; Lee segmento de routine
+	mov	bx, es:[ 2Ch ] ; Lee segmento de entorno del PSP de routine
+	mov	ah, 49h 
+	int	21h ; Libera segmento de routine (es)
+	mov	es, bx
+	int	21h ; Libera segmento de variables de entorno de routine
+	;; Pone a cero vector de interrupción 60h
+	cli
+	mov	ds:[ 60h*4 ], cx ; cx = 0
+	mov	ds:[ 60h*4+2 ], cx
+	sti
+	pop es ds cx bx ax
+	ret
+desinstalador ENDP
 
 
 ; Recibe en DX el carácter a buscar.
@@ -272,6 +303,8 @@ IST_END:
 	POP BP
 	RET
 HAS_ARG ENDP
+
+
 
 CODIGO ENDS
 END inicio

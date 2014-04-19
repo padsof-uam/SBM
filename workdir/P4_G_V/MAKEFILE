@@ -8,6 +8,9 @@ p4a.com: p4a.obj
 p4a.obj: p4a.asm
 	tasm /zi /m p4a
 
+p4a.exe: p4a.obj
+    tlink /t p4b
+
 b: p4b.exe 
 
 p4b.exe: p4b.obj
