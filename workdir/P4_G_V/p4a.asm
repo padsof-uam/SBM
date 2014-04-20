@@ -110,24 +110,13 @@ STAT ENDP
 routine PROC 
 	;; Salva registros modificados
 	push SI BX CX
-	MOV CX, DS
-	PUSH CX
-
-	; PUSH AX DX 
-	; MOV AX,CS
-	; MOV DS,AX
-
-	; MOV AH,9h
-	; MOV DX, OFFSET RUT_STATS
-	; INT 21H
-	; POP DX AX
 
 	MOV BX, DX ;; En DX está el offset de la cadena a convertir.
 
-	cmp AH, 12
+	cmp AH, 12H
 	jz dectohex
 
-	cmp AH, 13
+	cmp AH, 13H
 	jz hextodec
 
 	jmp fin
@@ -155,14 +144,13 @@ hextodec:
 
 	;jmp fin
 fin:
-	MOV AX, CS
-	MOV DS, AX
-	MOV AH, 9
-	MOV DX, SI
+	MOV DL, 'O'
+	MOV AH, 02H
 	INT 21H
 
-	POP CX
-	MOV DS, CX
+	MOV DL, 0AH
+	MOV AH, 02H
+	INT 21H
 	POP CX BX SI
 	IRET
 routine ENDP
@@ -174,7 +162,7 @@ CONVERT2BASE PROC NEAR
 ;			SI: 	El offset de la última posición en la que se empieza a escribir.
 ;			CX: 	La base a la que convertir.
 ;
-;	OUT:	Almacena en DS:[SI] los bytes ASCII de los caracteres del número.
+;	OUT:	Imprime los bytes ASCII de los caracteres del número.
 ;	
 ;	USES: AX,BX,CL,CH,DL,SI 
 MAIN_CNV2B:
@@ -188,10 +176,11 @@ MAIN_CNV2B:
     CMP DL,'9'
     JBE STORE
     ADD DL,'A'-'0'-10
-STORE:	;; Lo escribimos en memoria.
-	DEC SI
-	CALL STAT
-	MOV [SI],DL
+STORE:
+	MOV BX, AX
+	MOV AH, 02H
+	INT 21H 		; Imprimimos el carácter
+	MOV AX, BX
 	CMP AX, 0h
 	JNZ MAIN_CNV2B
 	RET
@@ -204,7 +193,6 @@ STRTOINT PROC NEAR
 ;
 ;	OUT:	AX: 	Número convertido.
 ;	
-	CALL STAT
 	PUSH DI DX
 	MOV DI,0h
 	MOV AX,0h
