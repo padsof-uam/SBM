@@ -1,0 +1,5 @@
+No nos ha dado tiempo a implementar la funcionalidad plena del apartado c.
+
+Conseguimos realizar una acción cada segundo (aunque fuera imprimir una cadena de texto)
+y modificamos el apartado a para podre devolver el offset e imprimirlo 
+en la interrupción 1Ch. Además quit lo reconoce. Solo faltaba juntar las piezas
