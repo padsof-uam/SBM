@@ -44,7 +44,13 @@ READ_LOOP:
 	MOV BUFFER[0], 80	
 	INT 21H			; Leemos la cadena
 
-	MOV SI, OFFSET BUFFER
+	MOV DI, OFFSET BUFFER + 1
+	MOV DL,DS:[DI]
+	XOR DH,DH
+	MOV DI,DX
+	MOV BUFFER[DI+2],0
+
+	MOV SI, OFFSET BUFFER + 2
 	MOV DI, OFFSET QUIT_STR
 	CALL SCMP
 
@@ -135,6 +141,8 @@ SCMP PROC
 	PUSH BP
 	MOV BP,SP
 	PUSH BX
+	XOR AX,AX
+	XOR BX,AX
 
 SCMP_LOOP:
 	MOV AL, [SI]
@@ -146,7 +154,7 @@ SCMP_LOOP:
 	INC SI
 	INC DI
 
-	CMP BX, 0H
+	CMP BX, 0h
 	JNZ SCMP_LOOP ; No hemos llegado al final de la cadena, volvemos al bucle.
 	MOV AX, 1H
 	JMP SCMP_END
