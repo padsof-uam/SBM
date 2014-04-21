@@ -6,9 +6,9 @@
 DATOS SEGMENT 
 	BUFFER		DB 	80 DUP ('$')
 	BUFFER_COPY DB	80 DUP ('$')
-	TOPRINT		DB 	2 DUP ('$')
 	DEC_STR 	DB	"dec"
-	QUIT_STR 	DB 	"quit"
+	TOPRINT		DB 	2 DUP ('$')
+	QUIT_STR 	DB 	"quit",0
 	INT_CALL_COUNT 	DW 	0
 	INT_PARAMS	DW 0
 DATOS ENDS 
@@ -77,9 +77,23 @@ PRINT:
 	MOV DI, OFFSET BUFFER_COPY ; Nos guardamos una copia del buffer actual
 	MOV AX, 80
 	CALL COPYBUF
+
+
 	JMP READ_LOOP
 	
 END_PROG:
+
+	; Desinstalamos la interrupcion si salimos del programa.
+	MOV AX, 0
+	MOV ES, AX
+	MOV AX, OFFSET EMPTY_ROUTINE
+	MOV BX, CS
+	CLI
+	MOV ES:[ 1CH*4 ], AX
+	MOV ES:[ 1CH*4+2 ], BX
+	STI
+
+	; Terminamos el programa.
 	MOV AX, 4C00H 
     INT 21H 
 
@@ -94,6 +108,7 @@ INSTALL_PERIODIC PROC
 	MOV ES:[ 1CH*4 ], AX
 	MOV ES:[ 1CH*4+2 ], BX
 	STI
+	RET
 INSTALL_PERIODIC ENDP
 
 COPYBUF PROC
@@ -167,29 +182,21 @@ SCMP_END:
 	RET
 SCMP ENDP
 
+;;; Recibe en SI el offset de la cadena a imprimir.
 PERIODIC PROC
+	; Sumamos 1 al temporizador y comprobamos si ha pasado 1 segundo aproximadamente.
 	MOV BX, INT_CALL_COUNT
+	INC BX
+	MOV INT_CALL_COUNT, BX
 	CMP BX, 18
 	JNE PERIODIC_END
 
-	MOV DL, [SI]
-		
-	CMP DL, '$'
-	JE PERIODIC_UNINSTALL
+	MOV INT_CALL_COUNT,0h ; Reiniciamos el temporizador
+	
+	MOV AH,9h
+	MOV DX,OFFSET DEC_STR
+	INT 21h
 
-	MOV TOPRINT[0], DL
-	MOV AX, INT_PARAMS
-	INT 60H
-
-PERIODIC_UNINSTALL:
-	MOV AX, 0
-	MOV ES, AX
-	MOV AX, OFFSET EMPTY_ROUTINE
-	MOV BX, CS
-	CLI
-	MOV ES:[ 1CH*4 ], AX
-	MOV ES:[ 1CH*4+2 ], BX
-	STI
 
 PERIODIC_END:
 	IRET

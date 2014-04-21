@@ -12,8 +12,8 @@ inicio:
 	tabla DB 'abcdf'
 	flag DW 0
 	USO DB "Autores: Victor de Juan Sanz y Guillermo Julian Moreno",0AH,0AH,"Ejecuta el programa con /I para instalar",0AH,"Ejecuta el programa con /D para instalar",0Ah,"$"
-	ESTADO_INS DB "El estado del driver es: instalado",0AH,"$"
-	ESTADO_UNINS DB "El estado del driver es: instalado",0AH,"$"
+	ESTADO_INS DB 0Ah,"El estado del driver es: instalado",0AH,"$"
+	ESTADO_UNINS DB 0Ah,"El estado del driver es: desinstalado",0AH,"$"
 	INSTALADO DB "Instalado",0AH,"$"
 	DESINSTALADO DB "Desinstalado",0AH,"$"
 	PRUEBAS DB	"Pruebas de la rutina (sin llamada a interrupcion): ", 0AH, "$"
@@ -21,8 +21,7 @@ inicio:
 	HEXADECIMAL DB "F","$"
 	BUFFER DB 15 dup ("$")
 	END_BUFFER DB 0Ah,"$"
-	RUT_STATS  DB "Interrupcion 60H tomando el control. Wololololo", 0AH, "$"	
-	PING 	DB "PING", 0AH, 0AH, "$"
+
 real_inicio:
 	MOV AX,0
 	;; Buscamos la I
@@ -44,6 +43,38 @@ help:
 	MOV DX,OFFSET USO
 	INT 21h
 	POP DS
+
+	;; Vamos a comprobar que esté instalado antes de nada.
+	PUSH ES
+	MOV AX,0
+	MOV ES,AX
+	MOV AX,	ES:[ 60h*4 ]
+	MOV BX,	ES:[ 60h*4 + 2 ]
+	POP ES
+	AND AX,BX
+	CMP AX,0
+	JE UNINSTALLED
+
+	PUSH DS
+	MOV AX, CS
+	MOV DS, AX
+	MOV AH, 9h
+	MOV DX,OFFSET ESTADO_INS
+	INT 21h
+	POP DS
+	JMP END_INIC
+
+UNINSTALLED:
+	PUSH DS
+	MOV AX, CS
+	MOV DS, AX
+	MOV AH, 9h
+	MOV DX,OFFSET ESTADO_UNINS
+	INT 21h
+	POP DS
+	JMP END_INIC
+
+END_INIC:
 	jmp fin_main
 
 install:
@@ -80,9 +111,6 @@ STAT PROC
 	MOV AX,CS
 	MOV DS,AX
 
-	MOV AH,9h
-	MOV DX, OFFSET PING
-	INT 21H
 	MOV DS, CX
 	POP CX DX AX
 	RET
@@ -240,6 +268,8 @@ instalador PROC
 instalador ENDP
 
 desinstalador PROC 
+
+
 	;; Desinstala routine de INT 60h
 	push ax bx cx ds es
 	mov cx, 0
@@ -255,7 +285,6 @@ desinstalador PROC
 	mov	ds:[ 60h*4 ], cx ; cx = 0
 	mov	ds:[ 60h*4+2 ], cx
 	sti
-
 
 	; Imprimimos el mensaje en pantalla
 	PUSH DS
