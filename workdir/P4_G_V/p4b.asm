@@ -5,9 +5,11 @@
 
 DATOS SEGMENT 
 	BUF DB 80 DUP('$')
-	HEXDEC DB "Escribe cadena para convertir: $"
+	DECHEX DB "Escribe cadena decimal para convertir (a hexa): $"
+	HEXDEC DB "Escribe cadena hexa para convertir (a decimal): $"
 	OUT_BUF DB 15 DUP('$')
 	END_BUF DB '$'
+	ERROR DB "La interrupcion no esta instalada. $"
 DATOS ENDS 
 
 PILA SEGMENT STACK "STACK" 
@@ -20,8 +22,25 @@ CODE SEGMENT
 START PROC
 	MOV AX, DATOS
 	MOV DS, AX
+	MOV AX, PILA
+	MOV SS, AX
+	MOV SP, 64 ; CARGA EL PUNTERO DE PILA CON EL VALOR MAS ALTO
+
+	;; Vamos a comprobar que esté instalado antes de nada.
+	PUSH ES
+	MOV AX,0
+	MOV ES,AX
+	MOV AX,	ES:[ 60h*4 ]
+	MOV BX,	ES:[ 60h*4 + 2 ]
+	POP ES
+	AND AX,BX
+	CMP AX,0
+	JE UNINSTALLED
+
+	MOV AX, DATOS
+	MOV DS, AX
 	MOV AH, 9h
-	MOV DX, OFFSET HEXDEC
+	MOV DX, OFFSET DECHEX
 	INT 21H
 
 	MOV AH, 0AH			
@@ -29,11 +48,18 @@ START PROC
 	MOV BUF[0], 80		
 	INT 21H
 
+	; Escribimos un salto de línea.
 	MOV DL, 0AH
 	MOV AH, 02H
 	INT 21H
 
-	MOV DX, OFFSET BUF
+	; Ignoramos el primer y el último de lo leido que es info adicional innecesaria.
+	MOV DI, OFFSET BUF + 1
+	MOV DL,DS:[DI]
+	XOR DH,DH
+	MOV DI,DX
+	MOV BUF[DI+2],'$'
+	MOV DX, OFFSET BUF + 2
 	MOV AH, 12H
 	INT 60H
 
@@ -50,10 +76,23 @@ START PROC
 	MOV AH, 02H
 	INT 21H
 
-	MOV DX, OFFSET BUF
+	MOV DI, OFFSET BUF + 1
+	MOV DL,DS:[DI]
+	XOR DH,DH
+	MOV DI,DX
+	MOV BUF[DI+2],'$'
+	MOV DX, OFFSET BUF + 2
 	MOV AH, 13H
 	INT 60H
+	JMP FIN
 
+UNINSTALLED:
+
+	MOV AH,9h
+	MOV DX, OFFSET ERROR
+	INT 21H
+
+FIN:
 	MOV AX, 4C00H 
     INT 21H 
 

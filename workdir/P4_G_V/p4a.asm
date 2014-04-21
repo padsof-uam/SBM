@@ -11,14 +11,14 @@ inicio:
 ;; Definicion de variables globales
 	tabla DB 'abcdf'
 	flag DW 0
-	AUTORES DB "Victor de Juan Sanz y Guillermo Julian Moreno","$"
-	USO DB "Ejecuta el programa con /I para instalar",0AH,"Ejecuta el programa con /D para instalar",0Ah,"$"
-	ESTADO DB "El estado del driver es: ","$"
-	INSTALADO DB "instalado",0AH,"$"
-	DESINSTALADO DB "desinstalado",0AH,"$"
+	USO DB "Autores: Victor de Juan Sanz y Guillermo Julian Moreno",0AH,0AH,"Ejecuta el programa con /I para instalar",0AH,"Ejecuta el programa con /D para instalar",0Ah,"$"
+	ESTADO_INS DB "El estado del driver es: instalado",0AH,"$"
+	ESTADO_UNINS DB "El estado del driver es: instalado",0AH,"$"
+	INSTALADO DB "Instalado",0AH,"$"
+	DESINSTALADO DB "Desinstalado",0AH,"$"
 	PRUEBAS DB	"Pruebas de la rutina (sin llamada a interrupcion): ", 0AH, "$"
-	DECIMAL DB "167","$"
-	HEXADECIMAL DB "FFFF","$"
+	DECIMAL DB "13","$"
+	HEXADECIMAL DB "F","$"
 	BUFFER DB 15 dup ("$")
 	END_BUFFER DB 0Ah,"$"
 	RUT_STATS  DB "Interrupcion 60H tomando el control. Wololololo", 0AH, "$"	
@@ -48,48 +48,30 @@ help:
 
 install:
 	call instalador
-	PUSH DS
-	MOV AX, CS
-	MOV DS, AX
-	MOV AH, 9h
-	MOV DX,OFFSET INSTALADO
-	INT 21h
-	POP DS
 	jmp fin_main
 
 uninstall:
 	call desinstalador
-	PUSH DS
-	MOV AX,CS
-	MOV DS,AX
-	MOV AH,9h
-	MOV DX,OFFSET DESINSTALADO
-	INT 21h
-	POP DS
 	jmp fin_main
 
 fin_main:
-	; PUSH DS
-	; MOV AX,CS
-	; MOV DS,AX
-
-	; MOV AH,9h
-	; MOV DX,OFFSET PRUEBAS
-	; INT 21h
-
-	; MOV DX,OFFSET DECIMAL
-	; MOV AH,12
-	; CALL routine
-	
-
-	; MOV DX, OFFSET HEXADECIMAL
-	; MOV AH,13
-	; CALL routine
-
-	; POP DS
-	
+;; PRUEBAS
+;	PUSH DS
+;	MOV AX,CS
+;	MOV DS,AX
+;	MOV AH,9h
+;	MOV DX,OFFSET PRUEBAS
+;	INT 21h
+;	MOV DX, OFFSET HEXADECIMAL
+;	MOV AH,13h
+;	CALL routine
+;	MOV DX,OFFSET DECIMAL
+;	MOV AH,12h
+;	CALL routine
+;	POP DS
+;	
 	MOV AX, 4C00H 
-    INT 21H 
+	INT 21H 
 
 
 STAT PROC
@@ -132,6 +114,10 @@ dectohex:
 	MOV CX, 10h
 	CALL CONVERT2BASE
 
+	MOV DL, 'h'
+	MOV AH, 02H
+	INT 21H
+
 	jmp fin
 
 hextodec:
@@ -142,12 +128,12 @@ hextodec:
 	MOV CX, 0AH
 	call CONVERT2BASE
 
-	;jmp fin
-fin:
 	MOV DL, 'O'
 	MOV AH, 02H
 	INT 21H
-
+	;jmp fin
+fin:
+	; Escribimos un salto de linea.
 	MOV DL, 0AH
 	MOV AH, 02H
 	INT 21H
@@ -224,7 +210,17 @@ instalador PROC
 	mov es:[ 60h*4 ], ax
 	mov es:[ 60h*4+2 ], bx
 	sti
+
+	PUSH DS
+	MOV AX, CS
+	MOV DS, AX
+	MOV AH, 9h
+	MOV DX,OFFSET INSTALADO
+	INT 21h
+	POP DS
+
 	mov dx, OFFSET instalador
+
 	int 27h ; Acaba y deja residente descartando el codigo que no interesa.
 	;; PSP, variables y rutina routine.
 instalador ENDP
@@ -245,7 +241,19 @@ desinstalador PROC
 	mov	ds:[ 60h*4 ], cx ; cx = 0
 	mov	ds:[ 60h*4+2 ], cx
 	sti
+
+
+	; Imprimimos el mensaje en pantalla
+	PUSH DS
+	MOV AX,CS
+	MOV DS,AX
+	MOV AH,9h
+	MOV DX,OFFSET DESINSTALADO
+	INT 21h
+	POP DS
+	
 	pop es ds cx bx ax
+
 	ret
 desinstalador ENDP
 
