@@ -198,6 +198,7 @@ SUBMAIN_CNV2B:
 STORE:
 	CMP AX, 0h
 	JNZ SUBMAIN_CNV2B
+
 	; Imprimimos el carácter guardado en DL
 	MOV AH, 02H
 	INT 21H 		

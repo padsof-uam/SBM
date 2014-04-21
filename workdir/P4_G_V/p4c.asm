@@ -6,11 +6,12 @@
 DATOS SEGMENT 
 	BUFFER		DB 	80 DUP ('$')
 	BUFFER_COPY DB	80 DUP ('$')
-	DEC_STR 	DB	"dec"
-	TOPRINT		DB 	2 DUP ('$')
+	DEC_STR 	DB	"dec",0
+	TOPRINT		DW 	2 DUP ('$')
 	QUIT_STR 	DB 	"quit",0
 	INT_CALL_COUNT 	DW 	0
 	INT_PARAMS	DW 0
+	INDEX		DW 2
 DATOS ENDS 
 
 PILA SEGMENT STACK "STACK" 
@@ -24,6 +25,11 @@ EXTRA ENDS
 
 CODE SEGMENT 
 	ASSUME CS: CODE, DS: DATOS, ES: EXTRA, SS: PILA 
+
+EMPTY_ROUTINE PROC
+	IRET
+EMPTY_ROUTINE ENDP
+
 
 START PROC
 	MOV AX, DATOS
@@ -57,7 +63,7 @@ READ_LOOP:
 	CMP AX, 1
 	JE END_PROG
 
-	MOV SI, OFFSET BUFFER
+	MOV SI, OFFSET BUFFER + 2
 	MOV DI, OFFSET DEC_STR
 	CALL SCMP
 
@@ -69,9 +75,12 @@ READ_LOOP:
 
 	MOV INT_PARAMS, 13H 	; Si nos piden que pasemos a decimal, cambiamos el parámetro
 	MOV SI, OFFSET BUFFER_COPY	; 	y usamos el buffer anterior
-
+	MOV DI,0
 PRINT:
-	CALL INSTALL_PERIODIC
+	MOV INT_CALL_COUNT, 17
+	CALL PERIODIC
+	CMP DI,1
+	JNE PRINT
 
 	MOV SI, OFFSET BUFFER
 	MOV DI, OFFSET BUFFER_COPY ; Nos guardamos una copia del buffer actual
@@ -84,7 +93,7 @@ PRINT:
 END_PROG:
 
 	; Desinstalamos la interrupcion si salimos del programa.
-	MOV AX, 0
+	MOV AX, CODE
 	MOV ES, AX
 	MOV AX, OFFSET EMPTY_ROUTINE
 	MOV BX, CS
@@ -93,9 +102,9 @@ END_PROG:
 	MOV ES:[ 1CH*4+2 ], BX
 	STI
 
-	; Terminamos el programa.
-	MOV AX, 4C00H 
-    INT 21H 
+	mov dx, OFFSET START
+	int 27h ; Acaba y deja residente el código de la rutina vacía,
+	; descartando el codigo que no interesa (PSP, variables)
 
 START ENDP 
 
@@ -189,22 +198,36 @@ PERIODIC PROC
 	INC BX
 	MOV INT_CALL_COUNT, BX
 	CMP BX, 18
-	JNE PERIODIC_END
+	JNE PERIODIC_REAL_END
 
 	MOV INT_CALL_COUNT,0h ; Reiniciamos el temporizador
 	
-	MOV AH,9h
-	MOV DX,OFFSET DEC_STR
-	INT 21h
+	; Guardamos en toprint el valor a imprimir y llamamos a la interrupción.
+	MOV SI,INDEX
+	MOV BL, BYTE PTR BUFFER[SI]
+	CMP BL,'$'
+	JE PERIODIC_END
 
+	INC SI
+	XOR BH,BH
+	MOV TOPRINT[0],BX
+	MOV AX,INT_PARAMS
+	MOV DX, OFFSET TOPRINT
+	INT 60h
+	JMP PERIODIC_REAL_END
 
 PERIODIC_END:
-	IRET
-PERIODIC ENDP
+	MOV SI,0
 
-EMPTY_ROUTINE PROC
-	IRET
-EMPTY_ROUTINE ENDP
+	;; Comprobacion auxiliar
+	MOV DI,1
+
+PERIODIC_REAL_END:
+
+	MOV INDEX,SI
+	RET
+
+PERIODIC ENDP
 
 CODE ENDS
 END START
