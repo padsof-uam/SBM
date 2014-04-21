@@ -69,7 +69,7 @@ fin_main:
 ;	MOV AH,12h
 ;	CALL routine
 ;	POP DS
-;	
+	
 	MOV AX, 4C00H 
 	INT 21H 
 
@@ -131,7 +131,7 @@ hextodec:
 	MOV DL, 'O'
 	MOV AH, 02H
 	INT 21H
-	;jmp fin
+
 fin:
 	; Escribimos un salto de linea.
 	MOV DL, 0AH
@@ -151,10 +151,15 @@ CONVERT2BASE PROC NEAR
 ;	OUT:	Imprime los bytes ASCII de los caracteres del número.
 ;	
 ;	USES: AX,BX,CL,CH,DL,SI 
+	MOV BX,AX
+	JMP SUBMAIN_CNV2B
 MAIN_CNV2B:
+	POP AX
+	MOV BX,AX
+SUBMAIN_CNV2B:
 	XOR DX,DX
 	DIV CX
-	;; El resto que es lo que nos interesa está en AX.
+	;; El resto de la division que es lo que nos interesa está en AX.
 	;	Nos quedamos con 1 byte para pasarlo a ASCII.
     XOR DH,DH
 	ADD DL,'0'
@@ -163,12 +168,21 @@ MAIN_CNV2B:
     JBE STORE
     ADD DL,'A'-'0'-10
 STORE:
-	MOV BX, AX
+	CMP AX, 0h
+	JNZ SUBMAIN_CNV2B
+	; Imprimimos el carácter guardado en DL
 	MOV AH, 02H
-	INT 21H 		; Imprimimos el carácter
-	MOV AX, BX
+	INT 21H 		
+
+	MOV AX,BX
+	XOR DX,DX
+	DIV CX
+	PUSH DX
 	CMP AX, 0h
 	JNZ MAIN_CNV2B
+
+	POP AX
+
 	RET
 CONVERT2BASE ENDP
 
