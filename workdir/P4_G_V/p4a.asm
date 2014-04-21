@@ -87,7 +87,7 @@ uninstall:
 
 fin_main:
 ;; PRUEBAS
-;	PUSH DS
+;	USH DS
 ;	MOV AX,CS
 ;	MOV DS,AX
 ;	MOV AH,9h
@@ -95,6 +95,7 @@ fin_main:
 ;	INT 21h
 ;	MOV DX, OFFSET HEXADECIMAL
 ;	MOV AH,13h
+;	MOV SI,0FFFFh
 ;	CALL routine
 ;	MOV DX,OFFSET DECIMAL
 ;	MOV AH,12h
@@ -138,7 +139,6 @@ dectohex:
 
 	;; tenemos en BX el valor a convertir en ASCII imprimible.
 
-	MOV SI, OFFSET END_BUFFER
 	MOV CX, 10h
 	CALL CONVERT2BASE
 
@@ -152,7 +152,6 @@ hextodec:
 	MOV CX,10h
 	CALL STRTOINT
 
-	MOV SI, OFFSET END_BUFFER
 	MOV CX, 0AH
 	call CONVERT2BASE
 
@@ -176,9 +175,11 @@ CONVERT2BASE PROC NEAR
 ;			SI: 	El offset de la última posición en la que se empieza a escribir.
 ;			CX: 	La base a la que convertir.
 ;
-;	OUT:	Imprime los bytes ASCII de los caracteres del número.
+;	OUT:	Imprime los bytes ASCII de los caracteres del número o devuelve en SI
+;				el offset en el que se encuentra la cadena.
 ;	
 ;	USES: AX,BX,CL,CH,DL,SI 
+
 	MOV BX,AX
 	JMP SUBMAIN_CNV2B
 MAIN_CNV2B:
@@ -199,10 +200,17 @@ STORE:
 	CMP AX, 0h
 	JNZ SUBMAIN_CNV2B
 
+	CMP SI,0FFFFh
+	JNE STORE_CNV2B
 	; Imprimimos el carácter guardado en DL
 	MOV AH, 02H
 	INT 21H 		
+	JMP NEXT_CNV2B
+STORE_CNV2B:
+	DEC SI
+	MOV [SI],DL
 
+NEXT_CNV2B:
 	MOV AX,BX
 	XOR DX,DX
 	DIV CX

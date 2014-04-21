@@ -7,11 +7,13 @@ DATOS SEGMENT
 	BUFFER		DB 	80 DUP ('$')
 	BUFFER_COPY DB	80 DUP ('$')
 	DEC_STR 	DB	"dec",0
-	TOPRINT		DW 	2 DUP ('$')
+	TOPRINT		DB 	8 DUP ('$')
+	END_BUFFER	DB	"$"
 	QUIT_STR 	DB 	"quit",0
 	INT_CALL_COUNT 	DW 	0
 	INT_PARAMS	DW 0
 	INDEX		DW 2
+	FUNCIONO	DB "?$"
 DATOS ENDS 
 
 PILA SEGMENT STACK "STACK" 
@@ -68,19 +70,16 @@ READ_LOOP:
 	CALL SCMP
 
 	MOV INT_PARAMS, 12H
-	MOV SI, OFFSET BUFFER ; Nos preparamos para convertir a hexa el buffer que nos pasan
+	MOV DI, OFFSET BUFFER ; Nos preparamos para convertir a hexa el buffer que nos pasan
 
 	CMP AX, 1 ; Salvo que nos pidan hacerlo a decimal
 	JNE PRINT
 
 	MOV INT_PARAMS, 13H 	; Si nos piden que pasemos a decimal, cambiamos el parámetro
-	MOV SI, OFFSET BUFFER_COPY	; 	y usamos el buffer anterior
+	MOV DI, OFFSET BUFFER_COPY	; 	y usamos el buffer anterior
 	MOV DI,0
 PRINT:
-	MOV INT_CALL_COUNT, 17
-	CALL PERIODIC
-	CMP DI,1
-	JNE PRINT
+	CALL INSTALL_PERIODIC
 
 	MOV SI, OFFSET BUFFER
 	MOV DI, OFFSET BUFFER_COPY ; Nos guardamos una copia del buffer actual
@@ -166,7 +165,7 @@ SCMP PROC
 	MOV BP,SP
 	PUSH BX
 	XOR AX,AX
-	XOR BX,AX
+	XOR BX,BX
 
 SCMP_LOOP:
 	MOV AL, [SI]
@@ -191,7 +190,7 @@ SCMP_END:
 	RET
 SCMP ENDP
 
-;;; Recibe en SI el offset de la cadena a imprimir.
+;;; Recibe en DI el offset de la cadena a imprimir.
 PERIODIC PROC
 	; Sumamos 1 al temporizador y comprobamos si ha pasado 1 segundo aproximadamente.
 	MOV BX, INT_CALL_COUNT
@@ -203,30 +202,31 @@ PERIODIC PROC
 	MOV INT_CALL_COUNT,0h ; Reiniciamos el temporizador
 	
 	; Guardamos en toprint el valor a imprimir y llamamos a la interrupción.
-	MOV SI,INDEX
-	MOV BL, BYTE PTR BUFFER[SI]
-	CMP BL,'$'
-	JE PERIODIC_END
+;	MOV DI,INDEX
+;	MOV BL, BYTE PTR BUFFER[DI]
+;	CMP BL,'$'
+;	JE PERIODIC_END
 
-	INC SI
-	XOR BH,BH
-	MOV TOPRINT[0],BX
-	MOV AX,INT_PARAMS
-	MOV DX, OFFSET TOPRINT
-	INT 60h
+	;INC DI
+	;XOR BH,BH
+	;MOV AX,INT_PARAMS
+	;MOV DX, OFFSET TOPRINT
+	;MOV SI, OFFSET END_BUFFER
+	;INT 60h
+	; Imprimimos el resultado.
+	;MOV DX,SI
+	;MOV AH,9
+	;INT 21H
+
+	MOV DX, OFFSET FUNCIONO
+	MOV AH,9
+	INT 21H
+
 	JMP PERIODIC_REAL_END
 
-PERIODIC_END:
-	MOV SI,0
-
-	;; Comprobacion auxiliar
-	MOV DI,1
-
 PERIODIC_REAL_END:
-
-	MOV INDEX,SI
+	
 	RET
-
 PERIODIC ENDP
 
 CODE ENDS
